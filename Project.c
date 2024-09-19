@@ -38,6 +38,14 @@ int num_validator(int AccNum, ACC *accounts);
 int email_validator(int AccNum, ACC *accounts);
 int pass_word_validator(int AccNum, ACC *accounts);
 
+void cleanup(ACC *accounts)
+{
+    if (accounts != NULL)
+    {
+        free(accounts);
+    }
+}
+
 int main()
 {
     char choix;
@@ -47,6 +55,7 @@ int main()
     {
         printf("Memory allocation failed!\n");
         printf("-------------------------------------\n");
+        cleanup(accounts);
         return 1;
     }
 
@@ -78,13 +87,15 @@ int main()
             Sign_Up(accounts);
             AccNum ++;
             num ++;
-            accounts = realloc(accounts, num * sizeof(ACC));
+            ACC *NewAccounts = realloc(accounts, num * sizeof(ACC));
             if (accounts == NULL)
             {
                 printf("Memory allocation failed!\n");
                 printf("-------------------------------------\n");
+                cleanup(accounts);
                 return 1;
-            }   
+            }
+            accounts = NewAccounts;
             break;
         case '2':
             Sign_in(accounts);
@@ -96,7 +107,7 @@ int main()
         }
     } while (choix != '0');
 
-    free(accounts);
+    cleanup(accounts);
     return 0;
 }
 
@@ -316,9 +327,9 @@ int pass_word_validator(int AccNum, ACC *accounts)
         printf("----------------------------------------------------------------\n");
         return 1;
     }
-    if (strcmp(accounts[AccNum].PassWord, accounts[AccNum].UserName) == 0)
+    if (strstr(accounts[AccNum].PassWord, accounts[AccNum].UserName) != NULL)
     {
-        printf("Password should not be the same as the username!\n");
+        printf("Password should not include the username!\n");
         printf("----------------------------------------------------------------\n");
         return 1;
     }
