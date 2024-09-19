@@ -301,6 +301,11 @@ int pass_word_validator(int AccNum, ACC *accounts)
         else if (isupper(accounts[AccNum].PassWord[i])) upper++;
         else if (isdigit(accounts[AccNum].PassWord[i])) number++;
         else if (strchr("!@#$%^&*", accounts[AccNum].PassWord[i])) special++;
+        else {
+            printf("Invalid characters in password! Only allowed special characters are !@#$%^&*\n");
+            printf("----------------------------------------------------------------\n");
+            return 1;
+        }
     }
     if (lower > 0 && upper > 0 && number > 0 && special > 0) {
         printf("Password is valid.\n");
