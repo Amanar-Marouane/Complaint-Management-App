@@ -19,10 +19,18 @@ typedef struct
     char AccType[MAX_NAME_LENGTH];
 } ACC;
 
-int AccNum = 0;
-int num = 1;
+int AccNum = 1;
+int num = 2;
+int index_to_sign_in = -1;
+int found = -1;
 
 void Sign_Up(ACC *accounts);
+void Sign_in(ACC *accounts);
+void Pass_Word_Sign_in(ACC *accounts);
+
+void admin_panel(ACC *accounts);
+void client_panel(ACC *accounts);
+void agent_panel(ACC *accounts);
 
 int name_validator(int AccNum, ACC *accounts);
 int username_validator(int AccNum, ACC *accounts);
@@ -41,6 +49,16 @@ int main()
         printf("-------------------------------------\n");
         return 1;
     }
+
+    strcpy(accounts[0].FullName, "Amanar Marouane");
+    strcpy(accounts[0].UserName, "MarouAdmin");
+    strcpy(accounts[0].Email, "marouane.amanar07@gmail.com");
+    strcpy(accounts[0].PhoneNumber, "0644311735");
+    strcpy(accounts[0].PassWord, "SLS1g5tQ7M5D9J!");
+    strcpy(accounts[0].AccType, "admin");
+
+    printf("Welcome to Claims management Panel\n");
+    printf("-----------------------------------\n");
 
     do
     {
@@ -68,7 +86,12 @@ int main()
                 return 1;
             }   
             break;
+        case '2':
+            Sign_in(accounts);
+            break;
         default:
+            printf("Invalid choice, please select a valid option.\n");
+            printf("----------------------------------------\n");
             break;
         }
     } while (choix != '0');
@@ -84,6 +107,7 @@ void Sign_Up(ACC *accounts)
         printf("Enter your full name : ");
         fgets(accounts[AccNum].FullName, MAX_NAME_LENGTH, stdin);
         accounts[AccNum].FullName[strcspn(accounts[AccNum].FullName, "\n")] = '\0';
+        printf("---------------------------------------------------\n");
     } while (name_validator(AccNum, accounts) == 1);
     
 
@@ -158,6 +182,7 @@ int name_validator(int AccNum, ACC *accounts)
     printf("----------------------------------------------------------------\n");
     return 0;
 }
+
 int username_validator(int AccNum, ACC *accounts)
 {
     if (strlen(accounts[AccNum].UserName) == 0)
@@ -179,6 +204,7 @@ int username_validator(int AccNum, ACC *accounts)
     printf("----------------------------------------------------------------\n");
     return 0;
 }
+
 int num_validator(int AccNum, ACC *accounts){
     for (int i = 0;accounts[AccNum].PhoneNumber[i] != '\0' ; i++)
     {
@@ -199,6 +225,7 @@ int num_validator(int AccNum, ACC *accounts){
     printf("----------------------------------------------------------------\n");
     return 1;
 }
+
 int email_validator(int AccNum, ACC *accounts){
     char *at = strchr(accounts[AccNum].Email, '@');
     char *dot = strrchr(accounts[AccNum].Email, '.');
@@ -278,6 +305,7 @@ int email_validator(int AccNum, ACC *accounts){
     printf("-----------------------------------------------------------------------\n");
     return 0;
 }
+
 int pass_word_validator(int AccNum, ACC *accounts)
 {
     int lower = 0, upper = 0, number = 0, special = 0;
@@ -316,4 +344,231 @@ int pass_word_validator(int AccNum, ACC *accounts)
     printf("Password invalid! It must contain at least one lowercase letter, one uppercase letter, one number, and one special character.\n");
     printf("------------------------------------------------------------------------------------------------------------------------------\n");
     return 1;
+}
+
+void Sign_in(ACC *accounts)
+{
+    char choice;
+    char email_to_sign_in[MAX_EMAIL_LENGTH];
+    char number_to_sign_in[MAX_PHONE_NUMBER_LENGTH];
+    char username_to_sign_in[MAX_NAME_LENGTH];
+
+    printf("Press 0 to cancel sign in\n");
+    printf("Press 1 to sign in by email\n");
+    printf("Press 2 to sign in by number\n");
+    printf("Press 3 to sign in by user name\n");
+    printf("==> ");
+    scanf(" %c",&choice);
+    getchar();
+    printf("----------------------------------------\n");
+
+    switch (choice)
+    {
+    case '0':
+        break;
+    case '1':
+        printf("Enter your email adress to sign in : ");
+        fgets(email_to_sign_in, MAX_EMAIL_LENGTH, stdin);
+        email_to_sign_in[strcspn(email_to_sign_in, "\n")] = '\0';
+        printf("-------------------------------------------------------------\n");
+        for (int i = 0; i < AccNum; i++)
+        {
+            if (strcmp(email_to_sign_in,accounts[i].Email) == 0)
+            {   
+                found = 0;
+                index_to_sign_in = i;
+                break;
+            }
+        }
+        if (found == -1)
+        {
+            printf("No such account include with this email.\nYou may want to sign up with this adress first\n");
+            printf("---------------------------------------------------\n");
+            return;
+        }
+        found = -1;
+        Pass_Word_Sign_in(accounts);
+        break;
+
+    case '2':
+        printf("Enter your number to sign in : ");
+        fgets(number_to_sign_in, MAX_EMAIL_LENGTH, stdin);
+        number_to_sign_in[strcspn(number_to_sign_in, "\n")] = '\0';
+        printf("--------------------------------------------------------\n");
+        for (int i = 0; i < AccNum; i++)
+        {
+            if (strcmp(number_to_sign_in,accounts[i].PhoneNumber) == 0)
+            {   
+                found = 0;
+                index_to_sign_in = i;
+                break;
+            }
+        }
+        if (found == -1)
+        {
+            printf("No such account include with this number.\nYou may want to sign up with this number first\n");
+            printf("---------------------------------------------------\n");
+            return;
+        }
+        found = -1;
+        Pass_Word_Sign_in(accounts);
+        break;
+
+    case '3':
+        printf("Enter your user name to sign in : ");
+        fgets(username_to_sign_in, MAX_EMAIL_LENGTH, stdin);
+        username_to_sign_in[strcspn(username_to_sign_in, "\n")] = '\0';
+        printf("--------------------------------------------------------\n");
+        for (int i = 0; i < AccNum; i++)
+        {
+            if (strcmp(username_to_sign_in,accounts[i].UserName) == 0)
+            {   
+                found = 0;
+                index_to_sign_in = i;
+                break;
+            }
+        }
+        if (found == -1)
+        {
+            printf("No such account include with this user name.\nYou may want to sign up with this user name first\n");
+            printf("---------------------------------------------------\n");
+            return;
+        }
+        found = -1;
+        Pass_Word_Sign_in(accounts);
+        break;
+        
+    default:
+        printf("Invalid choice, please select a valid option.\n");
+        printf("----------------------------------------\n");
+        break;
+    }
+
+    return;
+}
+
+void Pass_Word_Sign_in(ACC *accounts)
+{
+    char pass_word_to_sign_in[MAX_PASSWORD_LENGTH];
+
+    for (int i = 0; i < 3; i++)
+            {
+                printf("Enter your password to sign in : ");
+                fgets(pass_word_to_sign_in, MAX_EMAIL_LENGTH, stdin);
+                pass_word_to_sign_in[strcspn(pass_word_to_sign_in, "\n")] = '\0';
+                printf("---------------------------------------------------\n");
+
+                if (strcmp(pass_word_to_sign_in,accounts[index_to_sign_in].PassWord) == 0)
+                {   found = 0;
+                    break;
+                }
+                if (found == -1)
+                {
+                    printf("Incorrect password!!\n");
+                    printf("---------------------------------------------------\n");
+                }
+                if (i == 2)
+                {
+                    printf("You entered more then 3 times an incorrect password\n");
+                    printf("---------------------------------------------------\n");
+                    return;
+                }
+            }
+            printf("You signed in successfuly\n");
+            printf("---------------------------------------------------\n");
+
+            if (strcmp(accounts[index_to_sign_in].AccType, "client")) client_panel(accounts);
+            else if (strcmp(accounts[index_to_sign_in].AccType, "admin")) admin_panel(accounts);
+            else if (strcmp(accounts[index_to_sign_in].AccType, "Agent")) agent_panel(accounts);
+            
+            found = -1;
+}
+
+void admin_panel(ACC *accounts)
+{
+    printf("Welcom %s (%s)\n",accounts[index_to_sign_in].FullName,accounts[index_to_sign_in].AccType);
+    index_to_sign_in = -1;
+    char choice;
+    do
+    {
+        printf("Press 0 to sign out\n");
+        printf("Press 1 to see all the complains\n");
+        printf("Press 2 to see all the users\n");
+        printf("Press 3 to generate the statistics\n");
+        printf("Press 4 to manage the assignment roles\n");
+        printf("==> ");
+        scanf(" %c",&choice);
+        getchar();
+        printf("---------------------------------\n");
+
+        switch (choice)
+        {
+        case 0:
+            break;
+        
+        default:
+            printf("Invalid choice, please select a valid option.\n");
+            printf("----------------------------------------\n");
+            break;
+        }
+    } while (choice != '0');
+    return;
+}
+
+void client_panel(ACC *accounts)
+{
+    printf("Welcom %s (%s)\n",accounts[index_to_sign_in].FullName,accounts[index_to_sign_in].AccType);
+    index_to_sign_in = -1;
+    char choice;
+    do
+    {
+        printf("Press 0 to sign out\n");
+        printf("Press 1 to submit a complain\n");
+        printf("Press 2 to see your complains\n");
+        printf("==> ");
+        scanf(" %c",&choice);
+        getchar();
+        printf("---------------------------------\n");
+
+        switch (choice)
+        {
+        case 0:
+            break;
+        
+        default:
+            printf("Invalid choice, please select a valid option.\n");
+            printf("----------------------------------------\n");
+            break;
+        }
+    } while (choice != '0');
+    return;
+}
+
+void agent_panel(ACC *accounts)
+{
+    printf("Welcom %s (%s)\n",accounts[index_to_sign_in].FullName,accounts[index_to_sign_in].AccType);
+    index_to_sign_in = -1;
+    char choice;
+    do
+    {
+        printf("Press 0 to sign out\n");
+        printf("Press 1 to see all the complains");
+        printf("Press 2 to manage a complain");
+        printf("==> ");
+        scanf(" %c",&choice);
+        getchar();
+        printf("---------------------------------\n");
+
+        switch (choice)
+        {
+        case 0:
+            break;
+        
+        default:
+            printf("Invalid choice, please select a valid option.\n");
+            printf("----------------------------------------\n");
+            break;
+        }
+    } while (choice != '0');
+    return;
 }
