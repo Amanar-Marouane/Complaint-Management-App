@@ -3,11 +3,24 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#define MAX_NAME_LENGTH 30
+#define MAX_NAME_LENGTH 60
 #define MAX_PHONE_NUMBER_LENGTH 30
 #define MAX_EMAIL_LENGTH 256
 #define MAX_PASSWORD_LENGTH 30
 #define PHONE_NUMBER_LENGTH 10
+#define MAX_DESCRIPTION_LENGTH 256
+#define MAX_COMPLAINS 20
+
+typedef struct
+{
+    int ID;
+    char motif[MAX_NAME_LENGTH];
+    char description[MAX_DESCRIPTION_LENGTH];
+    char categorie[MAX_DESCRIPTION_LENGTH];
+    char status[MAX_NAME_LENGTH];
+    char date[MAX_NAME_LENGTH];
+} complain;
+
 
 typedef struct
 {
@@ -17,12 +30,15 @@ typedef struct
     char Email[MAX_EMAIL_LENGTH];
     char PassWord[MAX_PASSWORD_LENGTH];
     char AccType[MAX_NAME_LENGTH];
+    complain complains[MAX_COMPLAINS];
 } ACC;
 
 int AccNum = 1;
 int num = 2;
 int index_to_sign_in = -1;
 int found = -1;
+int numOfCom = 0;
+int Com_index = 1;
 
 void Sign_Up(ACC *accounts);
 void Sign_in(ACC *accounts);
@@ -37,6 +53,8 @@ int username_validator(int AccNum, ACC *accounts);
 int num_validator(int AccNum, ACC *accounts);
 int email_validator(int AccNum, ACC *accounts);
 int pass_word_validator(int AccNum, ACC *accounts);
+
+void Complain(ACC *accounts);
 
 void cleanup(ACC *accounts)
 {
@@ -189,6 +207,16 @@ int name_validator(int AccNum, ACC *accounts)
             return 1;
         }
     }
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (strcmp(accounts[i].FullName, accounts[AccNum].FullName) == 0)
+        {
+            printf("==> Contact name is already used.\n");
+            printf("----------------------------------------------------------------\n");
+            return 1;
+        }
+    }
+    
     printf("==>Contact name is accepted !!\n");
     printf("----------------------------------------------------------------\n");
     return 0;
@@ -211,6 +239,16 @@ int username_validator(int AccNum, ACC *accounts)
             return 1;
         }
     }
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (strcmp(accounts[i].UserName, accounts[AccNum].UserName) == 0)
+        {
+            printf("==> User name is already used.\n");
+            printf("----------------------------------------------------------------\n");
+            return 1;
+        }
+    }
+
     printf("==>UserName is accepted !!\n");
     printf("----------------------------------------------------------------\n");
     return 0;
@@ -232,6 +270,16 @@ int num_validator(int AccNum, ACC *accounts){
         printf("----------------------------------------------------------------\n");
         return 0;
     }
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (strcmp(accounts[i].PhoneNumber, accounts[AccNum].PhoneNumber) == 0)
+        {
+            printf("==> Phone number is already used.\n");
+            printf("----------------------------------------------------------------\n");
+            return 1;
+        }
+    }
+
     printf("==>Phone number is accepted !!\n");
     printf("----------------------------------------------------------------\n");
     return 1;
@@ -311,8 +359,17 @@ int email_validator(int AccNum, ACC *accounts){
         printf("-----------------------------------------------------------------------\n");
         return 1;
     }
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (strcmp(accounts[i].Email, accounts[AccNum].Email) == 0)
+        {
+            printf("==> This address email is already used.\n");
+            printf("----------------------------------------------------------------\n");
+            return 1;
+        }
+    }
 
-    printf("==>The email accepted !!\n");
+    printf("==>The address email is accepted !!\n");
     printf("-----------------------------------------------------------------------\n");
     return 0;
 }
@@ -495,6 +552,56 @@ void Pass_Word_Sign_in(ACC *accounts)
             found = -1;
 }
 
+void client_panel(ACC *accounts)
+{
+    printf("Welcom %s (%s)\n",accounts[index_to_sign_in].FullName,accounts[index_to_sign_in].AccType);
+    
+    char choice;
+    do
+    {
+        printf("Press 0 to sign out\n");
+        printf("Press 1 to submit a complain\n");
+        printf("Press 2 to see your complains\n");
+        printf("==> ");
+        scanf(" %c",&choice);
+        getchar();
+        printf("---------------------------------\n");
+
+        switch (choice)
+        {
+        case '0':
+            index_to_sign_in = -1;
+            break;
+
+        case '1':
+            Complain(accounts);
+            break;
+            
+        case '2':
+            if (numOfCom == 0)
+            {
+                printf("No complains to show\n");
+                break;
+            }
+            for (int i = 0; i < MAX_COMPLAINS; i++)
+            {
+                printf("%s\n%s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
+                printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                printf("Date : %s\n",accounts[index_to_sign_in].complains[i].date);
+                printf("---------------------------------------------------------------------------------\n");
+            }
+            break;
+
+        default:
+            printf("Invalid choice, please select a valid option.\n");
+            printf("----------------------------------------\n");
+            break;
+        }
+    } while (choice != '0');
+    return;
+}
+
 void admin_panel(ACC *accounts)
 {
     printf("Welcom %s (%s)\n",accounts[index_to_sign_in].FullName,accounts[index_to_sign_in].AccType);
@@ -507,35 +614,6 @@ void admin_panel(ACC *accounts)
         printf("Press 2 to see all the users\n");
         printf("Press 3 to generate the statistics\n");
         printf("Press 4 to manage the assignment roles\n");
-        printf("==> ");
-        scanf(" %c",&choice);
-        getchar();
-        printf("---------------------------------\n");
-
-        switch (choice)
-        {
-        case 0:
-            break;
-        
-        default:
-            printf("Invalid choice, please select a valid option.\n");
-            printf("----------------------------------------\n");
-            break;
-        }
-    } while (choice != '0');
-    return;
-}
-
-void client_panel(ACC *accounts)
-{
-    printf("Welcom %s (%s)\n",accounts[index_to_sign_in].FullName,accounts[index_to_sign_in].AccType);
-    index_to_sign_in = -1;
-    char choice;
-    do
-    {
-        printf("Press 0 to sign out\n");
-        printf("Press 1 to submit a complain\n");
-        printf("Press 2 to see your complains\n");
         printf("==> ");
         scanf(" %c",&choice);
         getchar();
@@ -582,4 +660,90 @@ void agent_panel(ACC *accounts)
         }
     } while (choice != '0');
     return;
+}
+
+void Complain(ACC *accounts)
+{
+    char choice;
+
+    accounts[index_to_sign_in].complains[numOfCom].ID = 0;
+    srand(time(NULL));
+    for (int i = 0; i < 9; i++)
+    {
+        accounts[index_to_sign_in].complains[numOfCom].ID += (rand() % 9) + 1;
+        accounts[index_to_sign_in].complains[numOfCom].ID *= 10;
+    }
+    printf("What's the subject of your complimennt : ");
+    fgets(accounts[index_to_sign_in].complains[numOfCom].motif, MAX_NAME_LENGTH, stdin);
+    accounts[index_to_sign_in].complains[numOfCom].motif[strcspn(accounts[index_to_sign_in].complains[numOfCom].motif, "\n")] = '\0';
+    printf("------------------------------------------------------------------\n");
+
+    printf("Description : ");
+    fgets(accounts[index_to_sign_in].complains[numOfCom].description, MAX_NAME_LENGTH, stdin);
+    accounts[index_to_sign_in].complains[numOfCom].description[strcspn(accounts[index_to_sign_in].complains[numOfCom].description, "\n")] = '\0';
+    printf("------------------------------------------------------------------\n");
+
+    printf("To choose a categorie :\n");
+    printf("Press 1 for 'Serious Adverse Events'\n");
+    printf("Press 2 for 'Moderate Adverse Events'\n");
+    printf("Press 3 for 'Administrative/Contractual Complaints'\n");
+    printf("Press 4 for 'Technical Complaints'\n");
+    printf("Press 5 for 'Customer Service'\n");
+    printf("Press 6 for 'Category Not Specified'\n");
+    printf("===> ");
+    scanf(" %c",&choice);
+    getchar();
+    printf("-----------------------------------------\n");
+
+    switch (choice)
+    {
+    case '1':
+        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Serious Adverse Events");
+        printf("Done!\n");
+        printf("-----------------------------------------\n");
+        break;
+    case '2':
+        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Moderate Adverse Events");
+        printf("Done!\n");
+        printf("-----------------------------------------\n");
+        break;
+    case '3':
+        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Administrative/Contractual Complaints");
+        printf("Done!\n");
+        printf("-----------------------------------------\n");
+        break;
+    case '4':
+        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Technical Complaints");
+        printf("Done!\n");
+        printf("-----------------------------------------\n");
+        break;
+    case '5':
+        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Customer Service");
+        printf("Done!\n");
+        printf("-----------------------------------------\n");
+        break;
+    case '6':
+        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Category Not Specified");
+        printf("Done!\n");
+        printf("-----------------------------------------\n");
+        break;
+    default:
+        printf("U choosed an invalid choice, this complain will include under the category of 'Category Not Specified'\n");
+        printf("-----------------------------------------------------------------------------------------------------------\n");
+        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Category Not Specified");
+        break;
+    }
+
+    printf("This complain will put under 'ongoing' while it proccess.\n");
+    printf("------------------------------------------------------------\n");
+    strcpy(accounts[index_to_sign_in].complains[numOfCom].status, "ongoing");
+
+    time_t current_time;
+    time(&current_time);
+    ctime(&current_time);
+    strcpy(accounts[index_to_sign_in].complains[numOfCom].date, ctime(&current_time));
+
+    printf("Time of submition : %s\n", accounts[index_to_sign_in].complains[numOfCom].date);
+    printf("------------------------------------------------------------\n");
+    numOfCom ++;
 }
