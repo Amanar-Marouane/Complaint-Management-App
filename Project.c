@@ -10,10 +10,11 @@
 #define PHONE_NUMBER_LENGTH 10
 #define MAX_DESCRIPTION_LENGTH 256
 #define MAX_COMPLAINS 20
+#define MAX_ID_DIGITS 10
 
 typedef struct
 {
-    int ID;
+    char ID[MAX_ID_DIGITS];
     char motif[MAX_NAME_LENGTH];
     char description[MAX_DESCRIPTION_LENGTH];
     char categorie[MAX_DESCRIPTION_LENGTH];
@@ -30,6 +31,7 @@ typedef struct
     char Email[MAX_EMAIL_LENGTH];
     char PassWord[MAX_PASSWORD_LENGTH];
     char AccType[MAX_NAME_LENGTH];
+    int NumOfCom;
     complain complains[MAX_COMPLAINS];
 } ACC;
 
@@ -37,8 +39,6 @@ int AccNum = 1;
 int num = 2;
 int index_to_sign_in = -1;
 int found = -1;
-int numOfCom = 0;
-int Com_index = 1;
 
 void Sign_Up(ACC *accounts);
 void Sign_in(ACC *accounts);
@@ -131,6 +131,7 @@ int main()
 
 void Sign_Up(ACC *accounts)
 {
+    accounts[AccNum].NumOfCom = 0;
     do
     {
         printf("Enter your full name : ");
@@ -223,10 +224,11 @@ int name_validator(int AccNum, ACC *accounts)
 }
 
 int username_validator(int AccNum, ACC *accounts)
-{
-    if (strlen(accounts[AccNum].UserName) == 0)
+{   
+    int alpha = 0;
+    if (strlen(accounts[AccNum].UserName) < 4)
     {
-        printf("==>UserName is not valid .\n(Empty!!)\n");
+        printf("==>UserName is too short.\n");
         printf("----------------------------------------------------------------\n");
         return 1;
     }
@@ -238,6 +240,16 @@ int username_validator(int AccNum, ACC *accounts)
             printf("----------------------------------------------------------------\n");
             return 1;
         }
+        if (isalpha(accounts[AccNum].UserName[i]))
+        {
+            alpha ++;
+        }
+    }
+    if (alpha == 0)
+    {
+        printf("==>UserName is not valid.\n(Must contain alphabets.)\n");
+        printf("----------------------------------------------------------------\n");
+        return 1;
     }
     for (int i = 0; i < AccNum; i++)
     {
@@ -578,14 +590,15 @@ void client_panel(ACC *accounts)
             break;
             
         case '2':
-            if (numOfCom == 0)
+            if (accounts[index_to_sign_in].NumOfCom == 0)
             {
                 printf("No complains to show\n");
+                printf("---------------------------------\n");
                 break;
             }
-            for (int i = 0; i < MAX_COMPLAINS; i++)
+            for (int i = 0; i < accounts[index_to_sign_in].NumOfCom; i++)
             {
-                printf("%s\n%s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
                 printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
                 printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
                 printf("Date : %s\n",accounts[index_to_sign_in].complains[i].date);
@@ -665,22 +678,28 @@ void agent_panel(ACC *accounts)
 void Complain(ACC *accounts)
 {
     char choice;
+    int num;
+    srand(time(0));
 
-    accounts[index_to_sign_in].complains[numOfCom].ID = 0;
-    srand(time(NULL));
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < MAX_ID_DIGITS; i++)
     {
-        accounts[index_to_sign_in].complains[numOfCom].ID += (rand() % 9) + 1;
-        accounts[index_to_sign_in].complains[numOfCom].ID *= 10;
+        num = rand() % 36; // car 10 (0-9) et 26(A-Z) ==> 10+26 = 36
+        if (num < 10)
+        {
+            accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].ID[i] = num + '0';
+        }else
+        {
+           accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].ID[i] = num - 10 + 'A';
+        }
     }
-    printf("What's the subject of your complimennt : ");
-    fgets(accounts[index_to_sign_in].complains[numOfCom].motif, MAX_NAME_LENGTH, stdin);
-    accounts[index_to_sign_in].complains[numOfCom].motif[strcspn(accounts[index_to_sign_in].complains[numOfCom].motif, "\n")] = '\0';
+    printf("What's the subject of your complaint : ");
+    fgets(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].motif, MAX_NAME_LENGTH, stdin);
+    accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].motif[strcspn(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].motif, "\n")] = '\0';
     printf("------------------------------------------------------------------\n");
 
     printf("Description : ");
-    fgets(accounts[index_to_sign_in].complains[numOfCom].description, MAX_NAME_LENGTH, stdin);
-    accounts[index_to_sign_in].complains[numOfCom].description[strcspn(accounts[index_to_sign_in].complains[numOfCom].description, "\n")] = '\0';
+    fgets(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].description, MAX_NAME_LENGTH, stdin);
+    accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].description[strcspn(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].description, "\n")] = '\0';
     printf("------------------------------------------------------------------\n");
 
     printf("To choose a categorie :\n");
@@ -698,52 +717,52 @@ void Complain(ACC *accounts)
     switch (choice)
     {
     case '1':
-        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Serious Adverse Events");
+        strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].categorie, "Serious Adverse Events");
         printf("Done!\n");
         printf("-----------------------------------------\n");
         break;
     case '2':
-        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Moderate Adverse Events");
+        strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].categorie, "Moderate Adverse Events");
         printf("Done!\n");
         printf("-----------------------------------------\n");
         break;
     case '3':
-        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Administrative/Contractual Complaints");
+        strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].categorie, "Administrative/Contractual Complaints");
         printf("Done!\n");
         printf("-----------------------------------------\n");
         break;
     case '4':
-        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Technical Complaints");
+        strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].categorie, "Technical Complaints");
         printf("Done!\n");
         printf("-----------------------------------------\n");
         break;
     case '5':
-        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Customer Service");
+        strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].categorie, "Customer Service");
         printf("Done!\n");
         printf("-----------------------------------------\n");
         break;
     case '6':
-        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Category Not Specified");
+        strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].categorie, "Category Not Specified");
         printf("Done!\n");
         printf("-----------------------------------------\n");
         break;
     default:
         printf("U choosed an invalid choice, this complain will include under the category of 'Category Not Specified'\n");
         printf("-----------------------------------------------------------------------------------------------------------\n");
-        strcpy(accounts[index_to_sign_in].complains[numOfCom].categorie, "Category Not Specified");
+        strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].categorie, "Category Not Specified");
         break;
     }
 
     printf("This complain will put under 'ongoing' while it proccess.\n");
     printf("------------------------------------------------------------\n");
-    strcpy(accounts[index_to_sign_in].complains[numOfCom].status, "ongoing");
+    strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].status, "ongoing");
 
     time_t current_time;
     time(&current_time);
     ctime(&current_time);
-    strcpy(accounts[index_to_sign_in].complains[numOfCom].date, ctime(&current_time));
+    strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].date, ctime(&current_time));
 
-    printf("Time of submition : %s\n", accounts[index_to_sign_in].complains[numOfCom].date);
+    printf("Time of submition : %s\n", accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].date);
     printf("------------------------------------------------------------\n");
-    numOfCom ++;
+    accounts[index_to_sign_in].NumOfCom ++;
 }
