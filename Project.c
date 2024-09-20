@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <windows.h>
 #define MAX_NAME_LENGTH 60
 #define MAX_PHONE_NUMBER_LENGTH 30
 #define MAX_EMAIL_LENGTH 256
@@ -11,6 +12,7 @@
 #define MAX_DESCRIPTION_LENGTH 256
 #define MAX_COMPLAINS 20
 #define MAX_ID_DIGITS 10
+#define KeyWords_Num 4
 
 typedef struct
 {
@@ -55,6 +57,7 @@ int email_validator(int AccNum, ACC *accounts);
 int pass_word_validator(int AccNum, ACC *accounts);
 
 void Complain(ACC *accounts);
+void Display_SORT_Com(ACC *accounts);
 
 void cleanup(ACC *accounts)
 {
@@ -550,6 +553,8 @@ void Pass_Word_Sign_in(ACC *accounts)
                 if (i == 2)
                 {
                     printf("You entered more then 3 times an incorrect password\n");
+                    printf("You need to wait for 10sec to Resign in again ....\n");
+                    Sleep(10000);
                     printf("---------------------------------------------------\n");
                     return;
                 }
@@ -627,6 +632,8 @@ void admin_panel(ACC *accounts)
         printf("Press 2 to see all the users\n");
         printf("Press 3 to generate the statistics\n");
         printf("Press 4 to manage the assignment roles\n");
+        printf("Press 5 to search for a complain\n");
+        printf("Press 6 to delete a complain\n");
         printf("==> ");
         scanf(" %c",&choice);
         getchar();
@@ -634,7 +641,10 @@ void admin_panel(ACC *accounts)
 
         switch (choice)
         {
-        case 0:
+        case '0':
+            break;
+        case '1':
+            Display_SORT_Com(accounts);
             break;
         
         default:
@@ -753,9 +763,9 @@ void Complain(ACC *accounts)
         break;
     }
 
-    printf("This complain will put under 'ongoing' while it proccess.\n");
+    printf("This complain will put under 'Under Proccess' while it proccess.\n");
     printf("------------------------------------------------------------\n");
-    strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].status, "ongoing");
+    strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].status, "Under Proccess");
 
     time_t current_time;
     time(&current_time);
@@ -765,4 +775,79 @@ void Complain(ACC *accounts)
     printf("Time of submition : %s\n", accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].date);
     printf("------------------------------------------------------------\n");
     accounts[index_to_sign_in].NumOfCom ++;
+}
+
+void Display_SORT_Com(ACC *accounts)
+{
+    //Sorting all the complains by using key words.
+    char KeyWords_1st[KeyWords_Num][MAX_DESCRIPTION_LENGTH] = {"critical failure", "system down", "data loss", "security breach"};
+    char KeyWords_2nd[KeyWords_Num][MAX_DESCRIPTION_LENGTH] = {"performance issues", "service disruption", "frequent errors", "backup failure"};
+    char KeyWords_3rd[KeyWords_Num][MAX_DESCRIPTION_LENGTH] = {"slow response", "feature request", "minor bug", "UI/UX improvement"};
+
+    printf("Urgent cases : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strstr(KeyWords_1st[k], accounts[i].complains[j].description) != NULL)
+                {
+                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                    printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+    printf("Important cases : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strstr(KeyWords_2nd[k], accounts[i].complains[j].description) != NULL)
+                {
+                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                    printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+    printf("Normal cases : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strstr(KeyWords_3rd[k], accounts[i].complains[j].description) != NULL)
+                {
+                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                    printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
 }
