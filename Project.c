@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#include <windows.h>
+#include <unistd.h>
 #define MAX_NAME_LENGTH 60
 #define MAX_PHONE_NUMBER_LENGTH 30
 #define MAX_EMAIL_LENGTH 256
@@ -41,6 +41,8 @@ int AccNum = 1;
 int num = 2;
 int index_to_sign_in = -1;
 int found = -1;
+int Acc_Index = -1;
+int Com_Index = -1;
 
 void Sign_Up(ACC *accounts);
 void Sign_in(ACC *accounts);
@@ -57,7 +59,16 @@ int email_validator(int AccNum, ACC *accounts);
 int pass_word_validator(int AccNum, ACC *accounts);
 
 void Complain(ACC *accounts);
-void Display_SORT_Com(ACC *accounts);
+void Display_ALL_USERS(ACC *accounts);
+void Display_Com(ACC *accounts);
+void Priority_Sort(ACC *accounts);
+void Category_Sort(ACC *accounts);
+void Status_Sort(ACC *accounts);
+void Search(ACC *accounts);
+void Search_ID(ACC *accounts);
+void Search_NAME(ACC *accounts);
+void Search_Date(ACC *accounts);
+void Status_change(ACC *accounts);
 
 void cleanup(ACC *accounts)
 {
@@ -450,72 +461,113 @@ void Sign_in(ACC *accounts)
     case '0':
         break;
     case '1':
-        printf("Enter your email adress to sign in : ");
-        fgets(email_to_sign_in, MAX_EMAIL_LENGTH, stdin);
-        email_to_sign_in[strcspn(email_to_sign_in, "\n")] = '\0';
-        printf("-------------------------------------------------------------\n");
-        for (int i = 0; i < AccNum; i++)
+        for (int k = 0; k < 3; k++)
         {
-            if (strcmp(email_to_sign_in,accounts[i].Email) == 0)
-            {   
-                found = 0;
-                index_to_sign_in = i;
+            printf("Enter your email adress to sign in : ");
+            fgets(email_to_sign_in, MAX_EMAIL_LENGTH, stdin);
+            email_to_sign_in[strcspn(email_to_sign_in, "\n")] = '\0';
+            printf("-------------------------------------------------------------\n");
+            for (int i = 0; i < AccNum; i++)
+            {
+                if (strcmp(email_to_sign_in,accounts[i].Email) == 0)
+                {   
+                    found = 0;
+                    index_to_sign_in = i;
+                    break;
+                }
+            }
+            if (found == -1)
+            {
+                printf("No such account include with this email.\n");
+                printf("---------------------------------------------------\n");
+            }else
+            {
                 break;
             }
-        }
-        if (found == -1)
-        {
-            printf("No such account include with this email.\nYou may want to sign up with this adress first\n");
-            printf("---------------------------------------------------\n");
-            return;
+
+            if (k == 2)
+            {
+                printf("You've entred incorrect information more then 3 times!!\n");
+                printf("You need to wait 1h before Resign in again ....\n");
+                sleep(3600);
+                return;
+            }  
         }
         found = -1;
         Pass_Word_Sign_in(accounts);
         break;
 
     case '2':
-        printf("Enter your number to sign in : ");
-        fgets(number_to_sign_in, MAX_EMAIL_LENGTH, stdin);
-        number_to_sign_in[strcspn(number_to_sign_in, "\n")] = '\0';
-        printf("--------------------------------------------------------\n");
-        for (int i = 0; i < AccNum; i++)
+        for (int k = 0; k < 3; k++)
         {
-            if (strcmp(number_to_sign_in,accounts[i].PhoneNumber) == 0)
-            {   
-                found = 0;
-                index_to_sign_in = i;
+            printf("Enter your number to sign in : ");
+            fgets(number_to_sign_in, MAX_EMAIL_LENGTH, stdin);
+            number_to_sign_in[strcspn(number_to_sign_in, "\n")] = '\0';
+            printf("--------------------------------------------------------\n");
+            for (int i = 0; i < AccNum; i++)
+            {
+                if (strcmp(number_to_sign_in,accounts[i].PhoneNumber) == 0)
+                {   
+                    found = 0;
+                    index_to_sign_in = i;
+                    break;
+                }
+            }
+            if (found == -1)
+            {
+                printf("No such account include with this number.\n");
+                printf("---------------------------------------------------\n");
+            }else
+            {
                 break;
             }
+
+            if (k == 2)
+            {
+                printf("You've entred incorrect information more then 3 times!!\n");
+                printf("You need to wait 1h before Resign in again ....\n");
+                sleep(3600);
+                return;
+            }
         }
-        if (found == -1)
-        {
-            printf("No such account include with this number.\nYou may want to sign up with this number first\n");
-            printf("---------------------------------------------------\n");
-            return;
-        }
+        
         found = -1;
         Pass_Word_Sign_in(accounts);
         break;
 
     case '3':
-        printf("Enter your user name to sign in : ");
-        fgets(username_to_sign_in, MAX_EMAIL_LENGTH, stdin);
-        username_to_sign_in[strcspn(username_to_sign_in, "\n")] = '\0';
-        printf("--------------------------------------------------------\n");
-        for (int i = 0; i < AccNum; i++)
+        for (int k = 0; k < 3; k++)
         {
-            if (strcmp(username_to_sign_in,accounts[i].UserName) == 0)
-            {   
-                found = 0;
-                index_to_sign_in = i;
+            printf("Enter your user name to sign in : ");
+            fgets(username_to_sign_in, MAX_EMAIL_LENGTH, stdin);
+            username_to_sign_in[strcspn(username_to_sign_in, "\n")] = '\0';
+            printf("--------------------------------------------------------\n");
+            for (int i = 0; i < AccNum; i++)
+            {
+                if (strcmp(username_to_sign_in,accounts[i].UserName) == 0)
+                {   
+                    found = 0;
+                    index_to_sign_in = i;
+                    break;
+                }
+            }
+            
+            if (found == -1)
+            {
+                printf("No such account include with this user name.\n");
+                printf("---------------------------------------------------\n");
+            }else
+            {
                 break;
             }
-        }
-        if (found == -1)
-        {
-            printf("No such account include with this user name.\nYou may want to sign up with this user name first\n");
-            printf("---------------------------------------------------\n");
-            return;
+
+            if (k == 2)
+            {
+                printf("You've entred incorrect information more then 3 times!!\n");
+                printf("You need to wait 1h before Resign in again ....\n");
+                sleep(3600);
+                return;
+            }
         }
         found = -1;
         Pass_Word_Sign_in(accounts);
@@ -554,7 +606,7 @@ void Pass_Word_Sign_in(ACC *accounts)
                 {
                     printf("You entered more then 3 times an incorrect password\n");
                     printf("You need to wait for 10sec to Resign in again ....\n");
-                    Sleep(10000);
+                    sleep(3600);
                     printf("---------------------------------------------------\n");
                     return;
                 }
@@ -628,12 +680,12 @@ void admin_panel(ACC *accounts)
     do
     {
         printf("Press 0 to sign out\n");
-        printf("Press 1 to see all the complains\n");
-        printf("Press 2 to see all the users\n");
-        printf("Press 3 to generate the statistics\n");
-        printf("Press 4 to manage the assignment roles\n");
-        printf("Press 5 to search for a complain\n");
-        printf("Press 6 to delete a complain\n");
+        printf("Press 1 to see all the users\n");
+        printf("Press 2 to see all the complains\n");
+        printf("Press 3 to search for a complain\n");
+        printf("Press 4 to delete a complain\n");
+        printf("Press 5 to manage the assignment roles\n");
+        printf("Press 6 to generate the statistics\n");
         printf("==> ");
         scanf(" %c",&choice);
         getchar();
@@ -642,9 +694,13 @@ void admin_panel(ACC *accounts)
         switch (choice)
         {
         case '0':
+            index_to_sign_in = -1;
             break;
         case '1':
-            Display_SORT_Com(accounts);
+            Display_ALL_USERS(accounts);
+            break;
+        case '2':
+            Display_Com(accounts);
             break;
         
         default:
@@ -674,6 +730,7 @@ void agent_panel(ACC *accounts)
         switch (choice)
         {
         case 0:
+            index_to_sign_in = -1;
             break;
         
         default:
@@ -763,9 +820,9 @@ void Complain(ACC *accounts)
         break;
     }
 
-    printf("This complain will put under 'Under Proccess' while it proccess.\n");
+    printf("This complain will put under 'Under process' while it proccess.\n");
     printf("------------------------------------------------------------\n");
-    strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].status, "Under Proccess");
+    strcpy(accounts[index_to_sign_in].complains[accounts[index_to_sign_in].NumOfCom].status, "Under process");
 
     time_t current_time;
     time(&current_time);
@@ -777,7 +834,85 @@ void Complain(ACC *accounts)
     accounts[index_to_sign_in].NumOfCom ++;
 }
 
-void Display_SORT_Com(ACC *accounts)
+void Display_ALL_USERS(ACC *accounts)
+{   
+    printf("Administrators : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (strcmp(accounts[i].AccType, "admin"));
+        {
+            printf("%s\n", accounts[i].FullName);
+            printf("UserName : %s\n",accounts[i].UserName);
+            printf("Phone number : %s\n",accounts[i].PhoneNumber);
+            printf("Email address : %s\n",accounts[i].Email);
+        }
+    }
+    printf("----------------------------------------------------------\n");
+    printf("Agents : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (strcmp(accounts[i].AccType, "agent"));
+        {
+            printf("%s\n", accounts[i].FullName);
+            printf("UserName : %s\n",accounts[i].UserName);
+            printf("Phone number : %s\n",accounts[i].PhoneNumber);
+            printf("Email address : %s\n",accounts[i].Email);
+        }
+    }
+    printf("----------------------------------------------------------\n");
+    printf("Clients : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (strcmp(accounts[i].AccType, "client"));
+        {
+            printf("%s\n", accounts[i].FullName);
+            printf("UserName : %s\n",accounts[i].UserName);
+            printf("Phone number : %s\n",accounts[i].PhoneNumber);
+            printf("Email address : %s\n",accounts[i].Email);
+        }
+    }
+    printf("----------------------------------------------------------\n");
+}
+
+void Display_Com(ACC *accounts)
+{
+    char choice;
+    printf("Press 0 to get back to the previous menu\n");
+    printf("Press 1 to display all the complains sorted by priorities\n");
+    printf("Press 2 to display all the complains sorted by categories\n");
+    printf("Press 3 to display all the complains sorted by status\n");
+    printf("==> ");
+    scanf(" %c",&choice);
+
+    do
+    {
+        switch (choice)
+        {
+        case '0':
+            break;
+
+        case '1':
+            Priority_Sort(accounts);
+            break;
+
+        case '2':
+            Category_Sort(accounts);
+            break;
+
+        case '3':
+            Status_Sort(accounts);
+            break;
+        
+        default:
+            printf("Invalid choice. Please choose a valid option\n");
+            printf("-------------------------------------------------------\n");
+            break;
+        }
+    } while (choice != '0');
+    
+}
+
+void Priority_Sort(ACC *accounts)
 {
     //Sorting all the complains by using key words.
     char KeyWords_1st[KeyWords_Num][MAX_DESCRIPTION_LENGTH] = {"critical failure", "system down", "data loss", "security breach"};
@@ -795,7 +930,7 @@ void Display_SORT_Com(ACC *accounts)
         {
             for (int k = 0; k < KeyWords_Num; k++)
             {
-                if (strstr(KeyWords_1st[k], accounts[i].complains[j].description) != NULL)
+                if (strstr(KeyWords_1st[k], accounts[i].complains[j].description) != 0)
                 {
                     printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
                     printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
@@ -817,7 +952,7 @@ void Display_SORT_Com(ACC *accounts)
         {
             for (int k = 0; k < KeyWords_Num; k++)
             {
-                if (strstr(KeyWords_2nd[k], accounts[i].complains[j].description) != NULL)
+                if (strstr(KeyWords_2nd[k], accounts[i].complains[j].description) != 0)
                 {
                     printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
                     printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
@@ -839,7 +974,7 @@ void Display_SORT_Com(ACC *accounts)
         {
             for (int k = 0; k < KeyWords_Num; k++)
             {
-                if (strstr(KeyWords_3rd[k], accounts[i].complains[j].description) != NULL)
+                if (strstr(KeyWords_3rd[k], accounts[i].complains[j].description) != 0)
                 {
                     printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
                     printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
@@ -850,4 +985,365 @@ void Display_SORT_Com(ACC *accounts)
         }
     }
     printf("-------------------------------------------------------------------------------------------\n");
+}
+
+void Category_Sort(ACC *accounts)
+{
+    printf("Serious Adverse Events : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strcmp(accounts[i].complains[j].categorie, "Serious Adverse Events") == 0)
+                {
+                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+    printf("Moderate Adverse Events : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strcmp(accounts[i].complains[j].categorie, "Moderate Adverse Events") == 0)
+                {
+                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+    printf("Administrative/Contractual Complaints : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strcmp(accounts[i].complains[j].categorie, "Administrative/Contractual Complaints") == 0)
+                {
+                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+    printf("Technical Complaints : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strcmp(accounts[i].complains[j].categorie, "Technical Complaints") == 0)
+                {
+                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+    printf("Customer Service : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strcmp(accounts[i].complains[j].categorie, "Customer Service") == 0)
+                {
+                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+    printf("Category Not Specified : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strcmp(accounts[i].complains[j].categorie, "Category Not Specified") == 0)
+                {
+                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif, accounts[index_to_sign_in].complains[i].status);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+}
+
+void Status_Sort(ACC *accounts)
+{
+   printf("Under process : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strcmp(accounts[i].complains[j].status, "Under process") == 0)
+                {
+                    printf("ID : %s\nComplaint : %s\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif);
+                    printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+    printf("Resolved : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strcmp(accounts[i].complains[j].status, "Resolved") == 0)
+                {
+                    printf("ID : %s\nComplaint : %s\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif);
+                    printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n");
+    printf("Rejected : \n\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            for (int k = 0; k < KeyWords_Num; k++)
+            {
+                if (strcmp(accounts[i].complains[j].status, "Rejected") == 0)
+                {
+                    printf("ID : %s\nComplaint : %s\n",accounts[index_to_sign_in].complains[i].ID, accounts[index_to_sign_in].complains[i].motif);
+                    printf("Category : %s\n",accounts[index_to_sign_in].complains[i].categorie);
+                    printf("Description : %s\n",accounts[index_to_sign_in].complains[i].description);
+                    printf("Date : %s\n\n",accounts[index_to_sign_in].complains[i].date);
+                }
+            }
+        }
+    }
+    printf("-------------------------------------------------------------------------------------------\n"); 
+}
+
+void Search(ACC *accounts)
+{
+    char choice;
+    do
+    {
+        printf("Press 0 to get to the previous menu\n");
+        printf("Press 1 to search by ID.\n");
+        printf("Press 2 to search by name\n");
+        printf("Press 3 to search by Date\n");
+        printf("==> ");
+        scanf(" %c",&choice);
+        printf("------------------------------------\n");
+        switch (choice)
+        {
+        case '0':
+            break;
+        
+        case '1':
+            Search_ID(accounts);
+            break;
+
+        case '2':
+            Search_NAME(accounts);
+            break;
+
+        case '3':
+            break;
+        
+        default:
+            break;
+        }
+    } while (choice != '0');
+    
+}
+
+void Search_ID(ACC *accounts)
+{
+    char IDtoSearch[MAX_ID_DIGITS];
+    printf("Enter the ID : ");
+    fgets(IDtoSearch, MAX_ID_DIGITS, stdin);
+    IDtoSearch[strcspn(IDtoSearch, "\n")] = '\0';
+    printf("----------------------------------------\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            i ++;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            if (strcmp(IDtoSearch, accounts[i].complains[j].ID) == 0)
+            {
+                found = 0;
+                Acc_Index = i;
+                Com_Index = j;
+                break;
+            }
+        }
+    }
+    if (found == -1)
+    {
+        printf("Complain is not found\n");
+        printf("----------------------------------------\n");
+        return;
+    }
+    Status_change(accounts);
+}
+
+void Search_NAME(ACC *accounts)
+{
+    char NameToSearch[MAX_NAME_LENGTH];
+    printf("Enter the name : ");
+    fgets(NameToSearch, MAX_NAME_LENGTH, stdin);
+    NameToSearch[strcspn(NameToSearch, "\n")] = '\0';
+    printf("----------------------------------------\n");
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (strcmp(NameToSearch, accounts[i].FullName) == 0)
+        {
+            found = 0;
+            Acc_Index = i;
+            break;
+        }
+    }
+    if (found == -1)
+    {
+        printf("Complain is not found\n");
+        printf("----------------------------------------\n");
+        return;
+    }
+
+    if (accounts[Acc_Index].NumOfCom == 0)
+    {
+        printf("This account have no complains yet.\n");
+        printf("----------------------------------------\n");
+    }
+    for (int i = 0; i < accounts[Acc_Index].NumOfCom; i++)
+    {
+        printf("ID : %s\nComplaint : %s (%s)\n",accounts[Acc_Index].complains[i].ID, accounts[Acc_Index].complains[i].motif, accounts[Acc_Index].complains[i].status);
+        printf("Category : %s\n",accounts[Acc_Index].complains[i].categorie);
+        printf("Description : %s\n",accounts[Acc_Index].complains[i].description);
+        printf("Date : %s\n",accounts[Acc_Index].complains[i].date);
+        printf("---------------------------------------------------------------------------------\n");
+    }
+    Acc_Index = -1;
+}
+
+void Search_Date(ACC *accounts)
+{
+    
+}
+
+void Status_change(ACC *accounts)
+{
+    printf("Complain found!!\n");
+    printf("ID : %s\nComplaint : %s (%s)\n",accounts[Acc_Index].complains[Com_Index].ID, accounts[Acc_Index].complains[Com_Index].motif, accounts[Acc_Index].complains[Com_Index].status);
+    printf("Category : %s\n",accounts[Acc_Index].complains[Com_Index].categorie);
+    printf("Description : %s\n",accounts[Acc_Index].complains[Com_Index].description);
+    printf("Date : %s\n",accounts[Acc_Index].complains[Com_Index].date);
+    printf("---------------------------------------------------------------------------------\n");
+    if (strcmp(accounts[Acc_Index].complains[Com_Index].status, "Under process") != 0)
+    {
+        return;
+    }
+    printf("This complain still Under process\n");
+    printf("Press 1 to change the status to 'Resolved'\n");
+    printf("Press 2 to change the status to 'Rejected'\n");
+    printf("Press 3 to keep it under process\n");
+    
+    char choice;
+    printf("==> ");
+    scanf(" %c",&choice);
+    printf("---------------------------------------------------------------------------------\n");
+
+    switch (choice)
+    {
+    case '1':
+        strcpy(accounts[Acc_Index].complains[Com_Index].status, "Resolved");
+        printf("Done!");
+        printf("---------------------------------------------------------------------------------\n");
+        break;
+
+    case '2':
+        strcpy(accounts[Acc_Index].complains[Com_Index].status, "Rejected");
+        printf("Done!");
+        printf("---------------------------------------------------------------------------------\n");
+        break;
+    case '3':
+        printf("Done!");
+        printf("---------------------------------------------------------------------------------\n");
+        break;
+
+    default:
+        printf("Wrong choice, this complain will stay under the process at the moment.\n");
+        printf("---------------------------------------------------------------------------------\n");
+        break;
+    }
+    Acc_Index = -1;
+    Com_Index = -1;
 }
