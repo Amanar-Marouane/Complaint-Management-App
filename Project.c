@@ -75,7 +75,9 @@ void Search_Date(ACC *accounts);
 void Search_Category(ACC *accounts);
 void Search_Status(ACC *accounts);
 void Status_change(ACC *accounts);
+void Com_Mod_Del(ACC *accounts);
 void Com_Modification(ACC *accounts);
+void Com_Deletion(ACC *accounts);
 
 void cleanup(ACC *accounts)
 {
@@ -665,7 +667,7 @@ void client_panel(ACC *accounts)
             }
             break;
         case '3':
-
+            Com_Mod_Del(accounts);
             break;
         default:
             printf("Invalid choice, please select a valid option.\n");
@@ -711,8 +713,10 @@ void admin_panel(ACC *accounts)
             break;
         case '4':
             Search_ID(accounts);
+            Status_change(accounts);
             break;
         case '5':
+            Com_Mod_Del(accounts);
             break;
         case '6':
             break;
@@ -755,9 +759,10 @@ void agent_panel(ACC *accounts)
             break;
         case '3':
             Search_ID(accounts);
+            Status_change(accounts);
             break;
         case '4':
-            Search_ID(accounts);
+            Com_Mod_Del(accounts);
             break;
         default:
             printf("Invalid choice, please select a valid option.\n");
@@ -1403,11 +1408,6 @@ void Search_ID(ACC *accounts)
         printf("----------------------------------------\n");
         return;
     }
-    if (strcmp(accounts[Acc_Index].AccType, "client") == 0)
-    {
-        return;
-    }
-    Status_change(accounts);
 }
 
 void Search_NAME(ACC *accounts)
@@ -1849,6 +1849,33 @@ void Status_change(ACC *accounts)
     }
 }
 
+void Com_Mod_Del(ACC *accounts)
+{
+    char choice;
+    printf("Press 0 to get back to the previous menu.\n");
+    printf("Press 1 to delete a complain.\n");
+    printf("Press 2 to modify a complain.\n");
+    printf("==> ");
+    scanf(" %c",&choice);
+    printf("--------------------------------------------");
+
+    switch (choice)
+    {
+    case '0':
+        break;
+    case '1':
+        Com_Deletion(accounts);
+        break;
+    case '2':
+        Com_Modification(accounts);
+        break;
+    default:
+        printf("Invalid choice. Please try again.\n");
+        printf("--------------------------------------------");
+        break;
+    }
+}
+
 void Com_Modification(ACC *accounts)
 {
     Search_ID(accounts);
@@ -1990,6 +2017,61 @@ void Com_Modification(ACC *accounts)
             } while (choice != '0');
         }
     }
+    Acc_Index = -1;
+    Com_Index = -1;
+}
+
+void Com_Deletion(ACC *accounts)
+{   
+    Search_ID(accounts);
+    if (strcmp(accounts[index_to_sign_in].AccType, "client") != 0 &&
+        strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) != 0)
+    {
+        printf("ID not found in your IDs complaints\n");
+        printf("-----------------------------------------------------\n");
+        return;
+    }
+
+    char choice;
+    do
+    {
+        printf("Press 0 to cancel the deletion of that complaint.\n");
+        printf("Press 1 to confirm the deletion of that complaint.\n");
+        printf("==> ");
+        scanf(" %c", &choice);
+        printf("------------------------------------------------------\n");
+
+        switch (choice)
+        {
+        case '0':
+            printf("The deletion has been canceled.\n");
+            printf("------------------------------------------------------\n");
+            break;
+        case '1':
+            if (accounts[Acc_Index].NumOfCom > 0)
+            {
+                for (int i = Com_Index; i < accounts[Acc_Index].NumOfCom - 1; i++)
+                {
+                    accounts[Acc_Index].complaints[i] = accounts[Acc_Index].complaints[i + 1];
+                }
+                memset(&accounts[Acc_Index].complaints[accounts[Acc_Index].NumOfCom - 1], 0, sizeof(accounts[Acc_Index].complaints[accounts[Acc_Index].NumOfCom - 1]));
+                accounts[Acc_Index].NumOfCom -= 1;
+                printf("The complaint has been deleted successfully.\n");
+                printf("------------------------------------------------------\n");
+            }
+            else
+            {
+                printf("No complaints to delete.\n");
+                printf("------------------------------------------------------\n");
+            }
+            break;
+        default:
+            printf("Invalid choice. Please try again.\n");
+            printf("------------------------------------------------------\n");
+            break;
+        }
+    } while (choice != '0');
+    
     Acc_Index = -1;
     Com_Index = -1;
 }
