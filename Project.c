@@ -458,6 +458,7 @@ void Sign_in(ACC *accounts)
     getchar();
     printf("----------------------------------------\n");
 
+
     switch (choice)
     {
     case '0':
@@ -580,8 +581,6 @@ void Sign_in(ACC *accounts)
         printf("----------------------------------------\n");
         break;
     }
-
-    return;
 }
 
 void Pass_Word_Sign_in(ACC *accounts)
@@ -946,32 +945,28 @@ void Display_Com(ACC *accounts)
     printf("==> ");
     scanf(" %c",&choice);
 
-    do
+    switch (choice)
     {
-        switch (choice)
-        {
-        case '0':
-            break;
+    case '0':
+        break;
 
-        case '1':
-            Priority_Sort(accounts);
-            break;
+    case '1':
+        Priority_Sort(accounts);
+        break;
 
-        case '2':
-            Category_Sort(accounts);
-            break;
+    case '2':
+        Category_Sort(accounts);
+        break;
 
-        case '3':
-            Status_Sort(accounts);
-            break;
-        
-        default:
-            printf("Invalid choice. Please choose a valid option\n");
-            printf("-------------------------------------------------------\n");
-            break;
-        }
-    } while (choice != '0');
+    case '3':
+        Status_Sort(accounts);
+        break;
     
+    default:
+        printf("Invalid choice. Please choose a valid option\n");
+        printf("-------------------------------------------------------\n");
+        break;
+    }
 }
 
 void Priority_Sort(ACC *accounts)
@@ -990,7 +985,7 @@ void Priority_Sort(ACC *accounts)
         {
             for (int k = 0; k < KeyWords_Num; k++)
             {
-                if (strstr(KeyWords_1st[k], accounts[i].complaints[j].description) != 0)
+                if (strchr(KeyWords_1st[k], accounts[i].complaints[j].description) != 0)
                 {
                     printf("Name : %s\n",accounts[i].FullName);
                     printf("ID : %s\nComplaint : %s (%s)\n",accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
@@ -998,6 +993,7 @@ void Priority_Sort(ACC *accounts)
                     printf("Description : %s\n",accounts[i].complaints[j].description);
                     printf("Note from the agency : %s\n",accounts[i].complaints[j].Note);
                     printf("Date : %s\n\n",accounts[i].complaints[j].date);
+                    break;
                 }
             }
         }
@@ -1014,7 +1010,7 @@ void Priority_Sort(ACC *accounts)
         {
             for (int k = 0; k < KeyWords_Num; k++)
             {
-                if (strstr(KeyWords_2nd[k], accounts[i].complaints[j].description) != 0)
+                if (strchr(KeyWords_2nd[k], accounts[i].complaints[j].description) != 0)
                 {
                     printf("Name : %s\n",accounts[i].FullName);
                     printf("ID : %s\nComplaint : %s (%s)\n",accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
@@ -1022,6 +1018,7 @@ void Priority_Sort(ACC *accounts)
                     printf("Description : %s\n",accounts[i].complaints[j].description);
                     printf("Note from the agency : %s\n",accounts[i].complaints[j].Note);
                     printf("Date : %s\n\n",accounts[i].complaints[j].date);
+                    break;
                 }
             }
         }
@@ -1038,7 +1035,7 @@ void Priority_Sort(ACC *accounts)
         {
             for (int k = 0; k < KeyWords_Num; k++)
             {
-                if (strstr(KeyWords_2nd[k], accounts[i].complaints[j].description) == 0 || strstr(KeyWords_1st[k], accounts[i].complaints[j].description) == 0)
+                if (strchr(KeyWords_2nd[k], accounts[i].complaints[j].description) == 0 || strstr(KeyWords_1st[k], accounts[i].complaints[j].description) == 0)
                 {
                     printf("Name : %s\n",accounts[i].FullName);
                     printf("ID : %s\nComplaint : %s (%s)\n",accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
@@ -1046,6 +1043,7 @@ void Priority_Sort(ACC *accounts)
                     printf("Description : %s\n",accounts[i].complaints[j].description);
                     printf("Note from the agency : %s\n",accounts[i].complaints[j].Note);
                     printf("Date : %s\n\n",accounts[i].complaints[j].date);
+                    break;
                 }
             }
         }
@@ -1304,6 +1302,7 @@ void Search(ACC *accounts)
 void Search_ID(ACC *accounts)
 {
     printf("Enter the ID : ");
+    getchar();
     fgets(IDtoSearch, MAX_ID_DIGITS, stdin);
     IDtoSearch[strcspn(IDtoSearch, "\n")] = '\0';
     printf("----------------------------------------\n");
@@ -1341,6 +1340,7 @@ void Search_NAME(ACC *accounts)
 {
     char NameToSearch[MAX_NAME_LENGTH];
     printf("Enter the name : ");
+    getchar();
     fgets(NameToSearch, MAX_NAME_LENGTH, stdin);
     NameToSearch[strcspn(NameToSearch, "\n")] = '\0';
     printf("----------------------------------------\n");
@@ -1385,6 +1385,7 @@ void Search_Date(ACC *accounts)
     do
     {
         printf("Enter a date (format: YYYY-MM-DD): ");
+        getchar();
         fgets(date_input, sizeof(date_input), stdin);
         date_input[strcspn(date_input, "\n")] = '\0';
         printf("---------------------------------------------------------------------------------\n");
@@ -1623,17 +1624,17 @@ void Status_change(ACC *accounts)
     {
     case '1':
         strcpy(accounts[Acc_Index].complaints[Com_Index].status, "Resolved");
-        printf("Done!");
+        printf("Done!\n");
         printf("---------------------------------------------------------------------------------\n");
         break;
 
     case '2':
         strcpy(accounts[Acc_Index].complaints[Com_Index].status, "Rejected");
-        printf("Done!");
+        printf("Done!\n");
         printf("---------------------------------------------------------------------------------\n");
         break;
     case '3':
-        printf("Done!");
+        printf("Done!\n");
         printf("---------------------------------------------------------------------------------\n");
         break;
 
@@ -1644,31 +1645,28 @@ void Status_change(ACC *accounts)
     }
     char Second_Choice;
 
-    do
+    printf("Press 0 to leave the note empty.\n");
+    printf("Press 1 to write a note about the complaint.\n");
+    printf("==> ");
+    scanf(" %c",&Second_Choice);
+    getchar();
+    printf("-----------------------------------------------------\n");
+
+    switch (Second_Choice)
     {
-        printf("Press 0 to leave the note empty.\n");
-        printf("Press 1 to write a note about the complaint.\n");
+    case '0':
+        break;
+
+    case '1':
         printf("==> ");
-        scanf(" %c",&Second_Choice);
-        getchar();
-        printf("-----------------------------------------------------\n");
-
-        switch (Second_Choice)
-        {
-        case '0':
-            break;
-
-        case '1':
-            printf("==> ");
-            fgets(accounts[Acc_Index].complaints[Com_Index].Note, MAX_DESCRIPTION_LENGTH, stdin);
-            accounts[Acc_Index].complaints[Com_Index].Note[strcspn(accounts[Acc_Index].complaints[Com_Index].Note, "\n")] = '\0';
-            break;
-        
-        default:
-            printf("Invalid choice. Please choose a valid option.\n");
-            break;
-        }
-    } while (Second_Choice != '0');
+        fgets(accounts[Acc_Index].complaints[Com_Index].Note, MAX_DESCRIPTION_LENGTH, stdin);
+        accounts[Acc_Index].complaints[Com_Index].Note[strcspn(accounts[Acc_Index].complaints[Com_Index].Note, "\n")] = '\0';
+        break;
+    
+    default:
+        printf("Invalid choice. Please choose a valid option.\n");
+        break;
+    }
 }
 
 void Com_Modification(ACC *accounts)
