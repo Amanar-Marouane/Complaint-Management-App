@@ -571,6 +571,7 @@ void admin_panel(ACC *accounts){
             Com_Mod_Del(accounts);
             break;
         case '6':
+            Roles_Assign(accounts);
             break;
         case '7':
             break;
@@ -1124,8 +1125,7 @@ void Search_Date(ACC *accounts){
     }
 }
 
-void Search_Category(ACC *accounts)
-{
+void Search_Category(ACC *accounts){
     char choice;
 
     printf("Press 0 to get back to the previous menu.\n");
@@ -1166,19 +1166,14 @@ void Search_Category(ACC *accounts)
     }
 }
 
-void S_complaints_by_category(ACC *accounts, const char *category_label, const char *category)
-{
+void S_complaints_by_category(ACC *accounts, const char *category_label, const char *category){
     printf("%s : \n", category_label);
-    for (int i = 0; i < AccNum; i++)
-    {
-        if (accounts[i].NumOfCom == 0)
-        {
+    for (int i = 0; i < AccNum; i++){
+        if (accounts[i].NumOfCom == 0){
             continue;
         }
-        for (int j = 0; j < accounts[i].NumOfCom; j++)
-        {
-            if (strcmp(accounts[i].complaints[j].categorie, category) == 0)
-            {
+        for (int j = 0; j < accounts[i].NumOfCom; j++){
+            if (strcmp(accounts[i].complaints[j].categorie, category) == 0){
                 printf("Name : %s\n", accounts[i].FullName);
                 printf("(%s)\n", accounts[i].complaints[j].date);
                 printf("ID : %s\nComplaint : %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
@@ -1191,8 +1186,7 @@ void S_complaints_by_category(ACC *accounts, const char *category_label, const c
     printf("-----------------------------------------------------------------------------------------------------------------------------\n");
 }
 
-void Search_Status(ACC *accounts)
-{
+void Search_Status(ACC *accounts){
     char choice;
 
     printf("Press 0 to get back to the previous menu.\n");
@@ -1203,8 +1197,7 @@ void Search_Status(ACC *accounts)
     scanf(" %c", &choice);
     printf("----------------------------------------------------------------------------------\n");
 
-    switch (choice)
-    {
+    switch (choice){
     case '0':
         break;
     case '1':
@@ -1222,19 +1215,14 @@ void Search_Status(ACC *accounts)
     }
 }
 
-void S_complaints_by_status(ACC *accounts, const char *status_label, const char *status)
-{
+void S_complaints_by_status(ACC *accounts, const char *status_label, const char *status){
     printf("%s : \n", status_label);
-    for (int i = 0; i < AccNum; i++)
-    {
-        if (accounts[i].NumOfCom == 0)
-        {
+    for (int i = 0; i < AccNum; i++){
+        if (accounts[i].NumOfCom == 0){
             continue;
         }
-        for (int j = 0; j < accounts[i].NumOfCom; j++)
-        {
-            if (strcmp(accounts[i].complaints[j].status, status) == 0)
-            {
+        for (int j = 0; j < accounts[i].NumOfCom; j++){
+            if (strcmp(accounts[i].complaints[j].status, status) == 0){
                 printf("Name : %s\n", accounts[i].FullName);
                 printf("(%s)\n", accounts[i].complaints[j].date);
                 printf("ID : %s\nComplaint : %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
@@ -1247,8 +1235,7 @@ void S_complaints_by_status(ACC *accounts, const char *status_label, const char 
     printf("-----------------------------------------------------------------------------------------------------------------------------\n");
 }
 
-void Status_change(ACC *accounts)
-{
+void Status_change(ACC *accounts){
     printf("Complain found!!\n");
     printf("Name : %s\n",accounts[Acc_Index].FullName);
     printf("ID : %s\nComplaint : %s (%s)\n",accounts[Acc_Index].complaints[Com_Index].ID, accounts[Acc_Index].complaints[Com_Index].motif, accounts[Acc_Index].complaints[Com_Index].status);
@@ -1257,14 +1244,12 @@ void Status_change(ACC *accounts)
     printf("Note from the agency : %s\n",accounts[Acc_Index].complaints[Com_Index].Note);
     printf("Date : %s\n",accounts[Acc_Index].complaints[Com_Index].date);
     printf("---------------------------------------------------------------------------------\n");
-    if (strcmp(accounts[Acc_Index].complaints[Com_Index].status, "Resolved") == 0 || strcmp(accounts[Acc_Index].complaints[Com_Index].status, "Rejected") == 0)
-    {
+    if (strcmp(accounts[Acc_Index].complaints[Com_Index].status, "Resolved") == 0 || strcmp(accounts[Acc_Index].complaints[Com_Index].status, "Rejected") == 0){
         printf("This complaint already have been treated.\n");
         printf("---------------------------------------------------------------------------------\n");
         return;
     }
-    if (strcmp(accounts[Acc_Index].complaints[Com_Index].status, "pending") == 0)
-    {
+    if (strcmp(accounts[Acc_Index].complaints[Com_Index].status, "pending") == 0){
         printf("This complain is still pending.\n");
     }
     printf("Press 1 to change the status to 'Resolved'\n");
@@ -1276,8 +1261,7 @@ void Status_change(ACC *accounts)
     scanf(" %c",&choice);
     printf("---------------------------------------------------------------------------------\n");
 
-    switch (choice)
-    {
+    switch (choice){
     case '1':
         strcpy(accounts[Acc_Index].complaints[Com_Index].status, "Resolved");
         printf("Done!\n");
@@ -1309,8 +1293,7 @@ void Status_change(ACC *accounts)
     getchar();
     printf("-----------------------------------------------------\n");
 
-    switch (Second_Choice)
-    {
+    switch (Second_Choice){
     case '0':
         break;
 
@@ -1328,8 +1311,7 @@ void Status_change(ACC *accounts)
     }
 }
 
-void Com_Mod_Del(ACC *accounts)
-{
+void Com_Mod_Del(ACC *accounts){
     char choice;
     printf("Press 0 to get back to the previous menu.\n");
     printf("Press 1 to delete a complain.\n");
@@ -1338,8 +1320,7 @@ void Com_Mod_Del(ACC *accounts)
     scanf(" %c",&choice);
     printf("--------------------------------------------\n");
 
-    switch (choice)
-    {
+    switch (choice){
     case '0':
         break;
     case '1':
@@ -1355,11 +1336,9 @@ void Com_Mod_Del(ACC *accounts)
     }
 }
 
-void Com_Modification(ACC *accounts)
-{
+void Com_Modification(ACC *accounts){
     Search_ID(accounts);
-    if (strcmp(accounts[index_to_sign_in].AccType, "client") != 0 && strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) != 0)
-    {
+    if (strcmp(accounts[index_to_sign_in].AccType, "client") != 0 && strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) != 0){
         printf("ID not found in your IDs complaints\n");
         printf("-----------------------------------------------------\n");
         return;
@@ -1373,8 +1352,7 @@ void Com_Modification(ACC *accounts)
     getchar();
     printf("-----------------------------------------------------\n");
     answer = tolower(Y_N);
-    if (answer == 'y')
-    {
+    if (answer == 'y'){
         memset(accounts[Acc_Index].complaints[Com_Index].motif, 0, sizeof(accounts[Acc_Index].complaints[Com_Index].motif));
         printf("Enter the new motif title : ");
         fgets(accounts[Acc_Index].complaints[Com_Index].motif, MAX_NAME_LENGTH, stdin);
@@ -1388,8 +1366,7 @@ void Com_Modification(ACC *accounts)
     getchar();
     printf("-----------------------------------------------------\n");
     answer = tolower(Y_N);
-    if (answer == 'y')
-    {
+    if (answer == 'y'){
         memset(accounts[Acc_Index].complaints[Com_Index].description, 0, sizeof(accounts[Acc_Index].complaints[Com_Index].description));
         printf("Enter the new description : ");
         fgets(accounts[Acc_Index].complaints[Com_Index].description, MAX_DESCRIPTION_LENGTH, stdin);
@@ -1403,8 +1380,7 @@ void Com_Modification(ACC *accounts)
     getchar();
     printf("-----------------------------------------------------\n");
     answer = tolower(Y_N);
-    if (answer == 'y')
-    {
+    if (answer == 'y'){
         memset(accounts[Acc_Index].complaints[Com_Index].categorie, 0, sizeof(accounts[Acc_Index].complaints[Com_Index].categorie));
         printf("To choose a categorie :\n");
         printf("Press 1 for 'Service quality'\n");
@@ -1418,8 +1394,7 @@ void Com_Modification(ACC *accounts)
         getchar();
         printf("-----------------------------------------\n");
 
-        switch (Y_N)
-        {
+        switch (Y_N){
         case '1':
             strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Service quality");
             printf("Done!\n");
@@ -1459,19 +1434,16 @@ void Com_Modification(ACC *accounts)
         }
     }
 
-    if (strcmp(accounts[Acc_Index].AccType, "client") != 0)
-    {
+    if (strcmp(accounts[Acc_Index].AccType, "client") != 0){
         printf("Do you want to modify the note ( Y/N ).\n");
         printf("==> ");
         scanf(" %c",&Y_N);
         printf("-----------------------------------------------------\n");
         answer = tolower(Y_N);
-        if (answer == 'y')
-        {   
+        if (answer == 'y'){   
             memset(accounts[Acc_Index].complaints[Com_Index].Note, MAX_DESCRIPTION_LENGTH, sizeof(MAX_DESCRIPTION_LENGTH));
             char choice;
-            do
-            {
+            do{
                 printf("Press 0 to leave the note empty.\n");
                 printf("Press 1 to write a note about the complaint.\n");
                 printf("==> ");
@@ -1479,8 +1451,7 @@ void Com_Modification(ACC *accounts)
                 getchar();
                 printf("-----------------------------------------------------\n");
 
-                switch (choice)
-                {
+                switch (choice){
                 case '0':
                     break;
 
@@ -1503,12 +1474,10 @@ void Com_Modification(ACC *accounts)
     Com_Index = -1;
 }
 
-void Com_Deletion(ACC *accounts)
-{   
+void Com_Deletion(ACC *accounts){   
     Search_ID(accounts);
     if (strcmp(accounts[index_to_sign_in].AccType, "client") != 0 &&
-        strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) != 0)
-    {
+        strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) != 0){
         printf("ID not found in your IDs complaints\n");
         printf("-----------------------------------------------------\n");
         return;
@@ -1522,15 +1491,13 @@ void Com_Deletion(ACC *accounts)
     scanf(" %c", &choice);
     printf("------------------------------------------------------\n");
 
-    switch (choice)
-    {
+    switch (choice){
     case '0':
         printf("The deletion has been canceled.\n");
         printf("------------------------------------------------------\n");
         break;
     case '1':
-        if (accounts[Acc_Index].NumOfCom > 0)
-        {
+        if (accounts[Acc_Index].NumOfCom > 0){
             for (int i = Com_Index; i < accounts[Acc_Index].NumOfCom - 1; i++)
             {
                 accounts[Acc_Index].complaints[i] = accounts[Acc_Index].complaints[i + 1];
@@ -1540,8 +1507,7 @@ void Com_Deletion(ACC *accounts)
             printf("The complaint has been deleted successfully.\n");
             printf("------------------------------------------------------\n");
         }
-        else
-        {
+        else{
             printf("No complaints to delete.\n");
             printf("------------------------------------------------------\n");
         }
@@ -1556,16 +1522,14 @@ void Com_Deletion(ACC *accounts)
     Com_Index = -1;
 }
 
-void Roles_Assign(ACC *accounts)
-{   
+void Roles_Assign(ACC *accounts){   
     char NameToSearch[MAX_NAME_LENGTH];
     printf("Enter the name : ");
     getchar();
     fgets(NameToSearch, MAX_NAME_LENGTH, stdin);
     NameToSearch[strcspn(NameToSearch, "\n")] = '\0';
     printf("----------------------------------------\n");
-    for (int i = 0; i < AccNum; i++)
-    {
+    for (int i = 0; i < AccNum; i++){
         if (strcmp(NameToSearch, accounts[i].FullName) == 0)
         {
             found = 0;
@@ -1573,8 +1537,7 @@ void Roles_Assign(ACC *accounts)
             break;
         }
     }
-    if (found == -1)
-    {
+    if (found == -1){
         printf("User is not found\n");
         printf("----------------------------------------\n");
         return;
@@ -1588,11 +1551,9 @@ void Roles_Assign(ACC *accounts)
     scanf(" %c",&choice);
     printf("-----------------------------------------------\n");
 
-    switch (choice)
-    {
+    switch (choice){
     case '1':
-        if (strcmp(accounts[Acc_Index].AccType, "admin") == 0)
-        {
+        if (strcmp(accounts[Acc_Index].AccType, "admin") == 0){
             printf("This account already an admin.\n");
             break;
         }
@@ -1600,8 +1561,7 @@ void Roles_Assign(ACC *accounts)
         printf("%s now an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
         break;
     case '2':
-        if (strcmp(accounts[Acc_Index].AccType, "agent") == 0)
-        {
+        if (strcmp(accounts[Acc_Index].AccType, "agent") == 0){
             printf("This account already an agent.\n");
             break;
         }
@@ -1609,8 +1569,7 @@ void Roles_Assign(ACC *accounts)
         printf("%s now an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
         break;
     case '3':
-        if (strcmp(accounts[Acc_Index].AccType, "client") == 0)
-        {
+        if (strcmp(accounts[Acc_Index].AccType, "client") == 0){
             printf("This account already a client.\n");
             break;
         }
