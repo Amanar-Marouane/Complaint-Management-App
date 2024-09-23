@@ -1112,10 +1112,11 @@ void Search_NAME(ACC *accounts){
 void Search_Date(ACC *accounts){
     char date_input[100];
     struct tm date__input = {0};
+    getchar();
 
     do{
         printf("Enter a date (format: YYYY-MM-DD): ");
-        getchar();
+        printf("==> ");
         fgets(date_input, sizeof(date_input), stdin);
         date_input[strcspn(date_input, "\n")] = '\0';
         printf("---------------------------------------------------------------------------------\n");
@@ -1149,7 +1150,9 @@ void Search_Date(ACC *accounts){
     }
     if (count == 0){
         printf("There's no complaints under this date.\n");
+        printf("---------------------------------------------------------------------------------\n");
     }
+    count = 0;
 }
 
 void Search_Category(ACC *accounts){
@@ -1194,6 +1197,7 @@ void Search_Category(ACC *accounts){
 }
 
 void S_complaints_by_category(ACC *accounts, const char *category_label, const char *category){
+    int count = 0;
     printf("%s : \n", category_label);
     for (int i = 0; i < AccNum; i++){
         if (accounts[i].NumOfCom == 0){
@@ -1201,6 +1205,7 @@ void S_complaints_by_category(ACC *accounts, const char *category_label, const c
         }
         for (int j = 0; j < accounts[i].NumOfCom; j++){
             if (strcmp(accounts[i].complaints[j].categorie, category) == 0){
+                count ++;
                 printf("Name : %s\n", accounts[i].FullName);
                 printf("(%s)\n", accounts[i].complaints[j].date);
                 printf("ID : %s\nComplaint : %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
@@ -1210,6 +1215,11 @@ void S_complaints_by_category(ACC *accounts, const char *category_label, const c
             }
         }
     }
+    if (count == 0)
+    {
+        printf("There's no complaints in this section at the moment.\n");
+    }
+    count = 0;
     printf("-----------------------------------------------------------------------------------------------------------------------------\n");
 }
 
@@ -1243,6 +1253,7 @@ void Search_Status(ACC *accounts){
 }
 
 void S_complaints_by_status(ACC *accounts, const char *status_label, const char *status){
+    int count = 0;
     printf("%s : \n", status_label);
     for (int i = 0; i < AccNum; i++){
         if (accounts[i].NumOfCom == 0){
@@ -1250,6 +1261,7 @@ void S_complaints_by_status(ACC *accounts, const char *status_label, const char 
         }
         for (int j = 0; j < accounts[i].NumOfCom; j++){
             if (strcmp(accounts[i].complaints[j].status, status) == 0){
+                count ++;
                 printf("Name : %s\n", accounts[i].FullName);
                 printf("(%s)\n", accounts[i].complaints[j].date);
                 printf("ID : %s\nComplaint : %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
@@ -1259,6 +1271,11 @@ void S_complaints_by_status(ACC *accounts, const char *status_label, const char 
             }
         }
     }
+    if (count == 0)
+    {
+        printf("There's no complaints under this status at the moment.\n");
+    }
+    count = 0;
     printf("-----------------------------------------------------------------------------------------------------------------------------\n");
 }
 
