@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#include <unistd.h>
+#include <windows.h>
 #define MAX_NAME_LENGTH 60
 #define MAX_PHONE_NUMBER_LENGTH 30
 #define MAX_EMAIL_LENGTH 256
@@ -96,6 +96,7 @@ void Com_Deletion(ACC *accounts);
 void Roles_Assign(ACC *accounts);
 
 void Statistiques(ACC *accounts);
+DWORD WINAPI Auto_Generate(LPVOID arg);
 
 void cleanup(ACC *accounts)
 {
@@ -106,7 +107,7 @@ void cleanup(ACC *accounts)
 
 int main()
 {
-    int initial_time = (int)time(NULL);
+    initial_time = (int)time(NULL);
 
     char choice;
     ACC *accounts = malloc(num * sizeof(ACC));
@@ -124,6 +125,13 @@ int main()
     strcpy(accounts[0].PhoneNumber, "0644311735");
     strcpy(accounts[0].PassWord, "SLS1g5tQ7M5D9J!");
     strcpy(accounts[0].AccType, "admin");
+
+    HANDLE thread = CreateThread(NULL, 0, Auto_Generate, accounts, 0, NULL);
+    if (thread == NULL) {
+        fprintf(stderr, "Error creating thread: %d\n", GetLastError());
+        free(accounts); // Free allocated memory before exiting
+        return 1;
+    }
 
     printf("Welcome to Claims management Panel\n");
     printf("-----------------------------------\n");
@@ -164,6 +172,8 @@ int main()
             break;
         }
     } while (choice != '0');
+
+    CloseHandle(thread);
     cleanup(accounts);
     return 0;
 }
@@ -387,7 +397,22 @@ int pass_word_validator(int AccNum, ACC *accounts){
         printf("----------------------------------------------------------------\n");
         return 1;
     }
-    if (strstr(accounts[AccNum].PassWord, accounts[AccNum].UserName) != NULL){
+
+    char UsernameToCheck[MAX_NAME_LENGTH];
+    for (int i = 0; i < MAX_NAME_LENGTH; i++)
+    {
+        UsernameToCheck[i] = tolower(accounts[AccNum].UserName[i]);
+    }
+    UsernameToCheck[strlen(accounts[AccNum].UserName)] = '\0';
+
+    char PassWordToCheck[MAX_PASSWORD_LENGTH];
+    for (int i = 0; i < MAX_PASSWORD_LENGTH; i++)
+    {
+        PassWordToCheck[i] = tolower(accounts[AccNum].PassWord[i]);
+    }
+    PassWordToCheck[strlen(accounts[AccNum].PassWord)] = '\0';
+    
+    if (strstr(PassWordToCheck, UsernameToCheck) != NULL){
         printf("Password should not include the username!\n");
         printf("----------------------------------------------------------------\n");
         return 1;
@@ -443,7 +468,7 @@ void Sign_in(ACC *accounts){
         }
         if (k == 2){
             printf("You've entered incorrect information more than 3 times! You need to wait 1 hour before trying again...\n");
-            sleep(3600);
+            Sleep(3600000);
             return;
         }
         printf("Invalid input, please try again.\n");
@@ -484,7 +509,7 @@ void Pass_Word_Sign_in(ACC *accounts){
         if (i == 2){
             printf("You've entered an incorrect password more than 3 times.\n");
             printf("You need to wait 1 hour before trying again...\n");
-            sleep(3600);
+            Sleep(3600);
             return;
         }
     }
@@ -582,6 +607,7 @@ void admin_panel(ACC *accounts){
             Roles_Assign(accounts);
             break;
         case '7':
+            Statistiques(accounts);
             break;
         default:
             printf("Invalid choice, please select a valid option.\n");
@@ -606,7 +632,7 @@ void agent_panel(ACC *accounts){
 
         switch (choice)
         {
-        case 0:
+        case '0':
             printf("Signing out...\n");
             index_to_sign_in = -1;
             break;
@@ -774,17 +800,24 @@ void Display_Com(ACC *accounts){
 
     char choice;
     printf("Press 0 to get back to the previous menu\n");
-    printf("Press 1 to display all the complaints sorted by priorities\n");
+    printf("Press 1 to display all the complaints sorted by priorities (Only admins have access to this feature).\n");
     printf("Press 2 to display all the complaints sorted by categories\n");
     printf("Press 3 to display all the complaints sorted by status\n");
     printf("==> ");
     scanf(" %c",&choice);
+    printf("---------------------------------\n");
 
     switch (choice){
     case '0':
         break;
 
     case '1':
+        if (strcmp(accounts[index_to_sign_in].AccType, "agent") == 0)
+        {
+            printf("Only admins have access to this feature!!\n");
+            printf("-------------------------------------------\n");
+            break;
+        }
         Priority_Sort(accounts);
         break;
 
@@ -987,6 +1020,7 @@ void Search(ACC *accounts){
     
     case '1':
         Search_ID(accounts);
+        Status_change(accounts);
         Acc_Index = -1;
         Com_Index = -1;
         break;
@@ -1011,6 +1045,7 @@ void Search(ACC *accounts){
 }
 
 void Search_ID(ACC *accounts){
+    int found = -1;
     printf("Enter the ID : ");
     getchar();
     fgets(IDtoSearch, MAX_ID_DIGITS, stdin);
@@ -1035,6 +1070,7 @@ void Search_ID(ACC *accounts){
         printf("----------------------------------------\n");
         return;
     }
+    found = -1;
 }
 
 void Search_NAME(ACC *accounts){
@@ -1443,32 +1479,10 @@ void Com_Modification(ACC *accounts){
         answer = tolower(Y_N);
         if (answer == 'y'){   
             memset(accounts[Acc_Index].complaints[Com_Index].Note, MAX_DESCRIPTION_LENGTH, sizeof(MAX_DESCRIPTION_LENGTH));
-            char choice;
-            do{
-                printf("Press 0 to leave the note empty.\n");
-                printf("Press 1 to write a note about the complaint.\n");
-                printf("==> ");
-                scanf(" %c",&choice);
-                getchar();
-                printf("-----------------------------------------------------\n");
-
-                switch (choice){
-                case '0':
-                    break;
-
-                case '1':
-                    printf("==> ");
-                    fgets(accounts[Acc_Index].complaints[Com_Index].Note, MAX_DESCRIPTION_LENGTH, stdin);
-                    accounts[Acc_Index].complaints[Com_Index].Note[strcspn(accounts[Acc_Index].complaints[Com_Index].Note, "\n")] = '\0';
-                    printf("---------------------------------------------------------------\n");
-                    break;
-                
-                default:
-                    printf("Invalid choice. Please choose a valid option.\n");
-                    printf("-----------------------------------------------------\n");
-                    break;
-                }
-            } while (choice != '0');
+            printf("==> ");
+            fgets(accounts[Acc_Index].complaints[Com_Index].Note, MAX_DESCRIPTION_LENGTH, stdin);
+            accounts[Acc_Index].complaints[Com_Index].Note[strcspn(accounts[Acc_Index].complaints[Com_Index].Note, "\n")] = '\0';
+            printf("---------------------------------------------------------------\n");
         }
     }
     Acc_Index = -1;
@@ -1571,7 +1585,8 @@ void Roles_Assign(ACC *accounts){
             break;
         }
         strcpy(accounts[Acc_Index].AccType, "admin");
-        printf("%s now is an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
+        printf("%s now is an %s.\n",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
+        printf("-------------------------------\n");
         break;
     case '2':
         if (strcmp(accounts[Acc_Index].AccType, "agent") == 0){
@@ -1580,7 +1595,8 @@ void Roles_Assign(ACC *accounts){
             break;
         }
         strcpy(accounts[Acc_Index].AccType, "agent");
-        printf("%s now is an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
+        printf("%s now is an %s.\n",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
+        printf("----------------------------\n");
         break;
     case '3':
         if (strcmp(accounts[Acc_Index].AccType, "client") == 0){
@@ -1589,7 +1605,8 @@ void Roles_Assign(ACC *accounts){
             break;
         }
         strcpy(accounts[Acc_Index].AccType, "client");
-        printf("%s now is an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
+        printf("%s now is an %s.\n",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
+        printf("-------------------------------------\n");
         break;
     default:
         break;
@@ -1625,7 +1642,7 @@ void Statistiques(ACC *accounts){
             }
         }
     }
-    printf("Theres %i/%i complaint resolved at the moment.\n",Total_Com_Resolved, Total_Com);
+    printf("Theres %i/%i complaint resolved at the moment.\n\n",Total_Com_Resolved, Total_Com);
     
     float TotalTime = 0;
     for (int i = 0; i < AccNum; i++)
@@ -1642,67 +1659,78 @@ void Statistiques(ACC *accounts){
             }
         }
     }
-    float avr = TotalTime / Total_Com_Resolved;
-    printf("The average time to process complaints is %.2f h.\n\n", avr);
+    float avr = TotalTime / Total_Com_Resolved / 60;
+    printf("The average time to process complaints is %.2f min.\n\n", avr);
 
     int current_time = (int)time(NULL);
     int count = 0;
 
-    if (current_time - initial_time >= 86000)
-    {
-        initial_time += 86000;
-        printf("You can now check the auto-generated text file for the daily report.\n");
-
-        FILE *Daily_Report;
-        Daily_Report = fopen("Daily_Report.txt", "w");
-        if (!Daily_Report) {
-            perror("Error opening file");
-            return;
-        }
-        fprintf(Daily_Report, "-For today report:\n\n");
-        fprintf(Daily_Report, "For the complaints that still under process:\n\n");
-        for (int i = 0; i < AccNum; i++) {
-            for (int j = 0; j < accounts[i].NumOfCom; j++) {
-                if (strcmp(accounts[i].complaints[j].status, "Under process") == 0) {
-                    count ++;
-                    fprintf(Daily_Report, "Name: %s\n", accounts[i].FullName);
-                    fprintf(Daily_Report, "ID: %s\nComplaint: %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
-                    fprintf(Daily_Report, "Category: %s\n", accounts[i].complaints[j].categorie);
-                    fprintf(Daily_Report, "Description: %s\n", accounts[i].complaints[j].description);
-                    fprintf(Daily_Report, "Note from the agency: %s\n", accounts[i].complaints[j].Note);
-                    fprintf(Daily_Report, "Date: %s\n\n", accounts[i].complaints[j].date);
-                }
-            }
-        }
-        if (count == 0)
-        {
-            fprintf(Daily_Report, "There's no complaints at the moment.\n");
-        }
-        count = 0;
-        fprintf(Daily_Report, "--------------------------------------------------------------------------\n");
-        fprintf(Daily_Report, "For the complaints that resolved:\n\n");
-        for (int i = 0; i < AccNum; i++) {
-            for (int j = 0; j < accounts[i].NumOfCom; j++) {
-                if (strcmp(accounts[i].complaints[j].status, "Resolved") == 0) {
-                    count ++;
-                    fprintf(Daily_Report, "Name: %s\n", accounts[i].FullName);
-                    fprintf(Daily_Report, "ID: %s\nComplaint: %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
-                    fprintf(Daily_Report, "Category: %s\n", accounts[i].complaints[j].categorie);
-                    fprintf(Daily_Report, "Description: %s\n", accounts[i].complaints[j].description);
-                    fprintf(Daily_Report, "Note from the agency: %s\n", accounts[i].complaints[j].Note);
-                    fprintf(Daily_Report, "Date: %s\n\n", accounts[i].complaints[j].date);
-                }
-            }
-        }
-        if (count == 0)
-        {
-            fprintf(Daily_Report, "There's no treated complaints at the moment.\n");
-        }
-        count = 0;
-        fprintf(Daily_Report, "-------------------------------------------------------------------------\n");
-        fclose(Daily_Report);
-    } else {
-        printf("After 24 hours, you can check the auto-generated text file.\n");
-    }
     printf("---------------------------------------------------------------\n");
+}
+
+DWORD WINAPI Auto_Generate(LPVOID arg){
+    ACC *accounts = (ACC *)arg;
+    int current_time = (int)time(NULL);
+    int count = 0;
+
+    while (1) {
+        Sleep(1000);
+        int current_time = (int)time(NULL);
+
+        if (current_time - initial_time >= 86400)
+        {
+            initial_time += 86400;
+
+            FILE *Daily_Report;
+            Daily_Report = fopen("Daily_Report.txt", "w");
+            if (!Daily_Report) {
+                perror("Error opening file");
+                return 1;
+            }
+            fprintf(Daily_Report, "- For today report:\n\n");
+            fprintf(Daily_Report, "-- the complaints that still under process:\n\n");
+            for (int i = 0; i < AccNum; i++) {
+                for (int j = 0; j < accounts[i].NumOfCom; j++) {
+                    if (strcmp(accounts[i].complaints[j].status, "Under process") == 0) {
+                        count ++;
+                        fprintf(Daily_Report, "Name: %s\n", accounts[i].FullName);
+                        fprintf(Daily_Report, "ID: %s\nComplaint: %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
+                        fprintf(Daily_Report, "Category: %s\n", accounts[i].complaints[j].categorie);
+                        fprintf(Daily_Report, "Description: %s\n", accounts[i].complaints[j].description);
+                        fprintf(Daily_Report, "Note from the agency: %s\n", accounts[i].complaints[j].Note);
+                        fprintf(Daily_Report, "Date: %s\n\n", accounts[i].complaints[j].date);
+                    }
+                }
+            }
+            if (count == 0)
+            {
+                fprintf(Daily_Report, "There's no complaints at the moment.\n");
+            }
+            count = 0;
+            fprintf(Daily_Report, "--------------------------------------------------------------------------\n");
+            fprintf(Daily_Report, "-- the complaints that resolved:\n\n");
+            for (int i = 0; i < AccNum; i++) {
+                for (int j = 0; j < accounts[i].NumOfCom; j++) {
+                    if (strcmp(accounts[i].complaints[j].status, "Resolved") == 0) {
+                        count ++;
+                        fprintf(Daily_Report, "Name: %s\n", accounts[i].FullName);
+                        fprintf(Daily_Report, "ID: %s\nComplaint: %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
+                        fprintf(Daily_Report, "Category: %s\n", accounts[i].complaints[j].categorie);
+                        fprintf(Daily_Report, "Description: %s\n", accounts[i].complaints[j].description);
+                        fprintf(Daily_Report, "Note from the agency: %s\n", accounts[i].complaints[j].Note);
+                        fprintf(Daily_Report, "Date: %s\n\n", accounts[i].complaints[j].date);
+                    }
+                }
+            }
+            if (count == 0)
+            {
+                fprintf(Daily_Report, "There's no treated complaints at the moment.\n");
+            }
+            count = 0;
+            fprintf(Daily_Report, "-------------------------------------------------------------------------\n");
+            fclose(Daily_Report);
+        }
+    }
+
+    return 0;
 }
