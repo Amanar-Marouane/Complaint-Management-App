@@ -24,6 +24,8 @@ typedef struct
     char status[MAX_NAME_LENGTH];
     char date[MAX_DATE_LENGTH];
     char Note[MAX_DESCRIPTION_LENGTH];
+    time_t TimeToCompare;
+    time_t TimeUntilResolved;
 
 } complain;
 
@@ -47,6 +49,7 @@ int found = -1;
 int Acc_Index = -1;
 int Com_Index = -1;
 char IDtoSearch[MAX_ID_DIGITS];
+int initial_time;
 
 void Sign_Up(ACC *accounts);
 void Sign_in(ACC *accounts);
@@ -66,6 +69,7 @@ int pass_word_validator(int AccNum, ACC *accounts);
 void Complain(ACC *accounts);
 
 void Display_ALL_USERS(ACC *accounts);
+void Display_User_Type(ACC *accounts, const char *userType, const char *displayName);
 
 void Display_Com(ACC *accounts);
 void Priority_Sort(ACC *accounts);
@@ -91,6 +95,8 @@ void Com_Deletion(ACC *accounts);
 
 void Roles_Assign(ACC *accounts);
 
+void Statistiques(ACC *accounts);
+
 void cleanup(ACC *accounts)
 {
     if (accounts != NULL){
@@ -100,6 +106,8 @@ void cleanup(ACC *accounts)
 
 int main()
 {
+    int initial_time = (int)time(NULL);
+
     char choice;
     ACC *accounts = malloc(num * sizeof(ACC));
     if (accounts == NULL){
@@ -702,20 +710,16 @@ void Complain(ACC *accounts){
         break;
     }
 
-    printf("This complain will put under 'pending'.\n");
+    printf("This complain will put under process.\n");
     printf("------------------------------------------------------------\n");
-    strcpy(accounts[index_to_sign_in].complaints[accounts[index_to_sign_in].NumOfCom].status, "pending");
+    strcpy(accounts[index_to_sign_in].complaints[accounts[index_to_sign_in].NumOfCom].status, "Under process");
 
     time_t current_time;
     time(&current_time);
 
+    accounts[index_to_sign_in].complaints[accounts[index_to_sign_in].NumOfCom].TimeToCompare = current_time;
+
     struct tm *time_info = localtime(&current_time);
-
-    time_info->tm_hour = 0;
-    time_info->tm_min = 0;
-    time_info->tm_sec = 0;
-
-    current_time = mktime(time_info);
     
     sprintf(accounts[index_to_sign_in].complaints[accounts[index_to_sign_in].NumOfCom].date, "%04d-%02d-%02d", time_info->tm_year + 1900, time_info->tm_mon + 1, time_info->tm_mday);
 
@@ -726,17 +730,24 @@ void Complain(ACC *accounts){
     accounts[index_to_sign_in].NumOfCom ++;
 }
 
-void Display_ALL_USERS(ACC *accounts){   
+void Display_ALL_USERS(ACC *accounts){
     if (AccNum == 1){
         printf("Only the admin's account exist at the moment.\n");
         printf("----------------------------------------------\n");
         return;
     }
 
-    printf("Administrators : \n\n");
+    Display_User_Type(accounts, "admin", "Administrators");
+    Display_User_Type(accounts, "agent", "Agents");
+    Display_User_Type(accounts, "client", "Clients");
+}
+
+void Display_User_Type(ACC *accounts, const char *userType, const char *displayName){
+    int count = 0;
+    printf("%s : \n\n", displayName);
     for (int i = 0; i < AccNum; i++){
-        if (strcmp(accounts[i].AccType, "admin") == 0)
-        {
+        if (strcmp(accounts[i].AccType, userType) == 0){
+            count++;
             printf("%s\n", accounts[i].FullName);
             printf("UserName : %s\n",accounts[i].UserName);
             printf("Phone number : %s\n",accounts[i].PhoneNumber);
@@ -744,27 +755,8 @@ void Display_ALL_USERS(ACC *accounts){
             printf("Complaints number : %i\n\n",accounts[i].NumOfCom);
         }
     }
-    printf("----------------------------------------------------------\n");
-    printf("Agents : \n\n");
-    for (int i = 0; i < AccNum; i++){
-        if (strcmp(accounts[i].AccType, "agent") == 0){
-            printf("%s\n", accounts[i].FullName);
-            printf("UserName : %s\n",accounts[i].UserName);
-            printf("Phone number : %s\n",accounts[i].PhoneNumber);
-            printf("Email address : %s\n",accounts[i].Email);
-            printf("Complaints number : %i\n\n",accounts[i].NumOfCom);
-        }
-    }
-    printf("----------------------------------------------------------\n");
-    printf("Clients : \n\n");
-    for (int i = 0; i < AccNum; i++){
-        if (strcmp(accounts[i].AccType, "client") == 0){
-            printf("%s\n", accounts[i].FullName);
-            printf("UserName : %s\n",accounts[i].UserName);
-            printf("Phone number : %s\n",accounts[i].PhoneNumber);
-            printf("Email address : %s\n",accounts[i].Email);
-            printf("Complaints number : %i\n\n",accounts[i].NumOfCom);
-        }
+    if (count == 0){
+        printf("There's no %s at the moment.\n", displayName);
     }
     printf("----------------------------------------------------------\n");
 }
@@ -873,7 +865,7 @@ void Priority_Sort(ACC *accounts){
         }
         for (int j = 0; j < accounts[i].NumOfCom; j++){
             for (int k = 0; k < KeyWords_Num; k++){
-                if (strstr(accounts[i].complaints[j].description, KeyWords_2nd[k]) == NULL || strstr(accounts[i].complaints[j].description, KeyWords_1st[k]) == NULL){
+                if (strstr(accounts[i].complaints[j].description, KeyWords_2nd[k]) == NULL && strstr(accounts[i].complaints[j].description, KeyWords_1st[k]) == NULL){
                     count ++;
                     printf("Name : %s\n",accounts[i].FullName);
                     printf("ID : %s\nComplaint : %s (%s)\n",accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
@@ -934,13 +926,12 @@ void display_complaints_by_category(ACC *accounts, const char *category_name) {
 
 void Status_Sort(ACC *accounts) {
     const char *statuses[] = {
-        "pending",
         "Under process",
         "Resolved",
         "Rejected"
     };
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 3; i++) {
         display_complaints_by_status(accounts, statuses[i]);
     }
 }
@@ -1190,7 +1181,7 @@ void Search_Status(ACC *accounts){
     char choice;
 
     printf("Press 0 to get back to the previous menu.\n");
-    printf("Press 1 to display all the complaints in 'pending' status.\n");
+    printf("Press 1 to display all the complaints in 'Under process' status.\n");
     printf("Press 2 to display all the complaints in 'Resolved' status.\n");
     printf("Press 3 to display all the complaints in 'Rejected' status.\n");
     printf("==> ");
@@ -1201,7 +1192,7 @@ void Search_Status(ACC *accounts){
     case '0':
         break;
     case '1':
-        S_complaints_by_status(accounts, "pending", "pending");
+        S_complaints_by_status(accounts, "Under process", "Under process");
         break;
     case '2':
         S_complaints_by_status(accounts, "Resolved", "Resolved");
@@ -1249,20 +1240,23 @@ void Status_change(ACC *accounts){
         printf("---------------------------------------------------------------------------------\n");
         return;
     }
-    if (strcmp(accounts[Acc_Index].complaints[Com_Index].status, "pending") == 0){
-        printf("This complain is still pending.\n");
+    if (strcmp(accounts[Acc_Index].complaints[Com_Index].status, "Under process") == 0){
+        printf("This complain is still Under process.\n");
     }
     printf("Press 1 to change the status to 'Resolved'\n");
     printf("Press 2 to change the status to 'Rejected'\n");
-    printf("Press 3 to  change the status to 'under process'\n");
     
     char choice;
+    time_t current_time;
+    time(&current_time);
+
     printf("==> ");
     scanf(" %c",&choice);
     printf("---------------------------------------------------------------------------------\n");
 
     switch (choice){
     case '1':
+        accounts[Acc_Index].complaints[Com_Index].TimeUntilResolved = current_time;
         strcpy(accounts[Acc_Index].complaints[Com_Index].status, "Resolved");
         printf("Done!\n");
         printf("---------------------------------------------------------------------------------\n");
@@ -1273,12 +1267,6 @@ void Status_change(ACC *accounts){
         printf("Done!\n");
         printf("---------------------------------------------------------------------------------\n");
         break;
-    case '3':
-        strcpy(accounts[Acc_Index].complaints[Com_Index].status, "under process");
-        printf("Done!\n");
-        printf("---------------------------------------------------------------------------------\n");
-        break;
-
     default:
         printf("Wrong choice, this complain will stay under the process at the moment.\n");
         printf("---------------------------------------------------------------------------------\n");
@@ -1338,11 +1326,24 @@ void Com_Mod_Del(ACC *accounts){
 
 void Com_Modification(ACC *accounts){
     Search_ID(accounts);
-    if (strcmp(accounts[index_to_sign_in].AccType, "client") != 0 && strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) != 0){
-        printf("ID not found in your IDs complaints\n");
+    if (strcmp(accounts[index_to_sign_in].AccType, "client") == 0 && strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) != 0){
+        printf("ID not found in your complaints list.\n");
         printf("-----------------------------------------------------\n");
         return;
     }
+    if (strcmp(accounts[index_to_sign_in].AccType, "client") == 0 && strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) == 0)
+    {
+        time_t current_time;
+        time(&current_time);
+
+        if (difftime(current_time, accounts[Acc_Index].complaints[Com_Index].TimeToCompare) >= 86400)
+        {
+            printf("It has been more than 24 hour since you submitted this complaint. You cannot delete or modify it now.\n");
+            printf("----------------------------------------------------------------------------------------------------------\n");
+            return;
+        }
+    }
+    
     char Y_N;
     char answer;
 
@@ -1476,11 +1477,22 @@ void Com_Modification(ACC *accounts){
 
 void Com_Deletion(ACC *accounts){   
     Search_ID(accounts);
-    if (strcmp(accounts[index_to_sign_in].AccType, "client") != 0 &&
-        strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) != 0){
-        printf("ID not found in your IDs complaints\n");
+    if (strcmp(accounts[index_to_sign_in].AccType, "client") == 0 && strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) != 0){
+        printf("ID not found in your complaints list.\n");
         printf("-----------------------------------------------------\n");
         return;
+    }
+    if (strcmp(accounts[index_to_sign_in].AccType, "client") == 0 && strcmp(accounts[Acc_Index].Email, accounts[index_to_sign_in].Email) == 0)
+    {
+        time_t current_time;
+        time(&current_time);
+
+        if (difftime(current_time, accounts[Acc_Index].complaints[Com_Index].TimeToCompare) >= 86400)
+        {
+            printf("It has been more than 24 hour since you submitted this complaint. You cannot delete or modify it now.\n");
+            printf("----------------------------------------------------------------------------------------------------------\n");
+            return;
+        }
     }
 
     char choice;
@@ -1554,30 +1566,143 @@ void Roles_Assign(ACC *accounts){
     switch (choice){
     case '1':
         if (strcmp(accounts[Acc_Index].AccType, "admin") == 0){
-            printf("This account already an admin.\n");
+            printf("This account already is an admin.\n");
+            printf("----------------------------------------\n");
             break;
         }
         strcpy(accounts[Acc_Index].AccType, "admin");
-        printf("%s now an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
+        printf("%s now is an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
         break;
     case '2':
         if (strcmp(accounts[Acc_Index].AccType, "agent") == 0){
-            printf("This account already an agent.\n");
+            printf("This account already is an agent.\n");
+            printf("----------------------------------------\n");
             break;
         }
         strcpy(accounts[Acc_Index].AccType, "agent");
-        printf("%s now an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
+        printf("%s now is an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
         break;
     case '3':
         if (strcmp(accounts[Acc_Index].AccType, "client") == 0){
-            printf("This account already a client.\n");
+            printf("This account already is a client.\n");
+            printf("----------------------------------------\n");
             break;
         }
         strcpy(accounts[Acc_Index].AccType, "client");
-        printf("%s now an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
+        printf("%s now is an %s.",accounts[Acc_Index].FullName, accounts[Acc_Index].AccType);
         break;
     default:
         break;
     }
     Acc_Index = -1;
+}
+
+void Statistiques(ACC *accounts){
+    int Total_Com = 0;
+    for (int i = 0; i < AccNum; i++)
+    {
+        Total_Com += accounts[i].NumOfCom;
+    }
+    printf("There's %i complaint at the moment.\n\n", Total_Com);
+    if (Total_Com == 0)
+    {
+        printf("---------------------------------------------------\n");
+        return;
+    }
+    
+    int Total_Com_Resolved = 0;
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            continue;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            if (strcmp(accounts[i].complaints[j].status, "Resolved") == 0)
+            {
+                Total_Com_Resolved ++;
+            }
+        }
+    }
+    printf("Theres %i/%i complaint resolved at the moment.\n",Total_Com_Resolved, Total_Com);
+    
+    float TotalTime = 0;
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            continue;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            if (strcmp(accounts[i].complaints[j].status, "Resolved") == 0)
+            {
+                TotalTime += difftime(accounts[i].complaints[j].TimeUntilResolved, accounts[i].complaints[j].TimeToCompare);
+            }
+        }
+    }
+    float avr = TotalTime / Total_Com_Resolved;
+    printf("The average time to process complaints is %.2f h.\n\n", avr);
+
+    int current_time = (int)time(NULL);
+    int count = 0;
+
+    if (current_time - initial_time >= 86000)
+    {
+        initial_time += 86000;
+        printf("You can now check the auto-generated text file for the daily report.\n");
+
+        FILE *Daily_Report;
+        Daily_Report = fopen("Daily_Report.txt", "w");
+        if (!Daily_Report) {
+            perror("Error opening file");
+            return;
+        }
+        fprintf(Daily_Report, "-For today report:\n\n");
+        fprintf(Daily_Report, "For the complaints that still under process:\n\n");
+        for (int i = 0; i < AccNum; i++) {
+            for (int j = 0; j < accounts[i].NumOfCom; j++) {
+                if (strcmp(accounts[i].complaints[j].status, "Under process") == 0) {
+                    count ++;
+                    fprintf(Daily_Report, "Name: %s\n", accounts[i].FullName);
+                    fprintf(Daily_Report, "ID: %s\nComplaint: %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
+                    fprintf(Daily_Report, "Category: %s\n", accounts[i].complaints[j].categorie);
+                    fprintf(Daily_Report, "Description: %s\n", accounts[i].complaints[j].description);
+                    fprintf(Daily_Report, "Note from the agency: %s\n", accounts[i].complaints[j].Note);
+                    fprintf(Daily_Report, "Date: %s\n\n", accounts[i].complaints[j].date);
+                }
+            }
+        }
+        if (count == 0)
+        {
+            fprintf(Daily_Report, "There's no complaints at the moment.\n");
+        }
+        count = 0;
+        fprintf(Daily_Report, "--------------------------------------------------------------------------\n");
+        fprintf(Daily_Report, "For the complaints that resolved:\n\n");
+        for (int i = 0; i < AccNum; i++) {
+            for (int j = 0; j < accounts[i].NumOfCom; j++) {
+                if (strcmp(accounts[i].complaints[j].status, "Resolved") == 0) {
+                    count ++;
+                    fprintf(Daily_Report, "Name: %s\n", accounts[i].FullName);
+                    fprintf(Daily_Report, "ID: %s\nComplaint: %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
+                    fprintf(Daily_Report, "Category: %s\n", accounts[i].complaints[j].categorie);
+                    fprintf(Daily_Report, "Description: %s\n", accounts[i].complaints[j].description);
+                    fprintf(Daily_Report, "Note from the agency: %s\n", accounts[i].complaints[j].Note);
+                    fprintf(Daily_Report, "Date: %s\n\n", accounts[i].complaints[j].date);
+                }
+            }
+        }
+        if (count == 0)
+        {
+            fprintf(Daily_Report, "There's no treated complaints at the moment.\n");
+        }
+        count = 0;
+        fprintf(Daily_Report, "-------------------------------------------------------------------------\n");
+        fclose(Daily_Report);
+    } else {
+        printf("After 24 hours, you can check the auto-generated text file.\n");
+    }
+    printf("---------------------------------------------------------------\n");
 }
