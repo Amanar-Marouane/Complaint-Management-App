@@ -127,7 +127,7 @@ int main()
     strcpy(accounts[0].AccType, "admin");
 
     HANDLE thread = CreateThread(NULL, 0, Auto_Generate, accounts, 0, NULL);
-    // default security attributes, default stack size, 
+    // default security attributes, default stack size, thread function, parameter to thread function, creation flag to start in suspended state, no thread identifier
     if (thread == NULL) {
         fprintf(stderr, "Error creating thread: %d\n", GetLastError());
         free(accounts); // Free allocated memory before exiting, thread function, parameter to thread function, default creation flags, returns the thread identifier
