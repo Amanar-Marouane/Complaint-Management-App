@@ -127,9 +127,10 @@ int main()
     strcpy(accounts[0].AccType, "admin");
 
     HANDLE thread = CreateThread(NULL, 0, Auto_Generate, accounts, 0, NULL);
+    // default security attributes, default stack size, 
     if (thread == NULL) {
         fprintf(stderr, "Error creating thread: %d\n", GetLastError());
-        free(accounts); // Free allocated memory before exiting
+        free(accounts); // Free allocated memory before exiting, thread function, parameter to thread function, default creation flags, returns the thread identifier
         return 1;
     }
 
@@ -892,26 +893,29 @@ void Priority_Sort(ACC *accounts){
     count = 0;
     printf("-------------------------------------------------------------------------------------------\n");
     printf("Normal cases : \n\n");
-    for (int i = 0; i < AccNum; i++){
-        if (accounts[i].NumOfCom == 0){
-            continue;
-        }
-        for (int j = 0; j < accounts[i].NumOfCom; j++){
-            for (int k = 0; k < KeyWords_Num; k++){
-                if (strstr(accounts[i].complaints[j].description, KeyWords_2nd[k]) == NULL && strstr(accounts[i].complaints[j].description, KeyWords_1st[k]) == NULL){
-                    count ++;
-                    printf("Name : %s\n",accounts[i].FullName);
-                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
-                    printf("Category : %s\n",accounts[i].complaints[j].categorie);
-                    printf("Description : %s\n",accounts[i].complaints[j].description);
-                    printf("Note from the agency : %s\n",accounts[i].complaints[j].Note);
-                    printf("Date : %s\n\n",accounts[i].complaints[j].date);
+    for (int i = 0; i < AccNum; i++) {
+        if (accounts[i].NumOfCom == 0) continue;
+
+        for (int j = 0; j < accounts[i].NumOfCom; j++) {
+            int is_urgent_or_important = 0;
+            for (int k = 0; k < KeyWords_Num; k++) {
+                if (strstr(accounts[i].complaints[j].description, KeyWords_1st[k]) != NULL || strstr(accounts[i].complaints[j].description, KeyWords_2nd[k]) != NULL) {
+                    is_urgent_or_important = 1;
                     break;
                 }
             }
+            if (is_urgent_or_important == 0) {
+                count++;
+                printf("Name : %s\n", accounts[i].FullName);
+                printf("ID : %s\nComplaint : %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
+                printf("Category : %s\n", accounts[i].complaints[j].categorie);
+                printf("Description : %s\n", accounts[i].complaints[j].description);
+                printf("Note from the agency : %s\n", accounts[i].complaints[j].Note);
+                printf("Date : %s\n\n", accounts[i].complaints[j].date);
+            }
         }
     }
-    if (count == 0){
+    if (count == 0) {
         printf("There's no normal cases.\n");
     }
     count = 0;
@@ -1448,50 +1452,37 @@ void Com_Modification(ACC *accounts){
         getchar();
         printf("-----------------------------------------\n");
 
-        switch (Y_N){
-        case '1':
-            strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Service quality");
-            printf("Done!\n");
-            printf("-----------------------------------------\n");
-            break;
-        case '2':
-            strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Product issue");
-            printf("Done!\n");
-            printf("-----------------------------------------\n");
-            break;
-        case '3':
-            strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Factoration problem");
-            printf("Done!\n");
-            printf("-----------------------------------------\n");
-            break;
-        case '4':
-            strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Technical Complaints");
-            printf("Done!\n");
-            printf("-----------------------------------------\n");
-            break;
-        case '5':
-            strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Customer Service");
-            printf("Done!\n");
-            printf("-----------------------------------------\n");
-            break;
-        case '6':
-            strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Category Not Specified");
-            printf("Done!\n");
-            printf("-----------------------------------------\n");
-            break;
-        default:
-            strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Category Not Specified");
-            printf("U choosed an invalid choice, this complain will include under the category of 'Category Not Specified'\n");
-            printf("-----------------------------------------------------------------------------------------------------------\n");
-            strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Category Not Specified");
-            break;
+        switch (Y_N) {
+            case '1':
+                strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Service quality");
+                break;
+            case '2':
+                strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Product issue");
+                break;
+            case '3':
+                strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Factoration problem");
+                break;
+            case '4':
+                strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Technical Complaints");
+                break;
+            case '5':
+                strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Customer Service");
+                break;
+            case '6':
+            default:
+                strcpy(accounts[Acc_Index].complaints[Com_Index].categorie, "Category Not Specified");
+                printf("You chose an invalid choice, this complaint will be categorized as 'Category Not Specified'.\n");
+                break;
         }
+        printf("Done!\n");
+        printf("-----------------------------------------\n");
     }
 
     if (strcmp(accounts[Acc_Index].AccType, "client") != 0){
         printf("Do you want to modify the note ( Y/N ).\n");
         printf("==> ");
         scanf(" %c",&Y_N);
+        getchar();
         printf("-----------------------------------------------------\n");
         answer = tolower(Y_N);
         if (answer == 'y'){   
