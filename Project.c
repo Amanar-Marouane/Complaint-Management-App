@@ -877,32 +877,35 @@ void Priority_Sort(ACC *accounts){
     }
     count = 0;
     printf("-------------------------------------------------------------------------------------------\n");
-    printf("Important cases : \n\n");
-    for (int i = 0; i < AccNum; i++){
-        if (accounts[i].NumOfCom == 0){
-            continue;
-        }
-        for (int j = 0; j < accounts[i].NumOfCom; j++){
-            for (int k = 0; k < KeyWords_Num; k++){
-                if (strstr(accounts[i].complaints[j].description, KeyWords_2nd[k]) != NULL){
-                    for (int h = 0; h < index; h++){
-                        if (strstr(accounts[i].complaints[j].ID, Urgent_ID_Cases[h]) == NULL){
-                            count ++;
-                            printf("Name : %s\n",accounts[i].FullName);
-                            printf("ID : %s\nComplaint : %s (%s)\n",accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
-                            printf("Category : %s\n",accounts[i].complaints[j].categorie);
-                            printf("Description : %s\n",accounts[i].complaints[j].description);
-                            printf("Note from the agency : %s\n",accounts[i].complaints[j].Note);
-                            printf("Date : %s\n\n",accounts[i].complaints[j].date);
-                            break;
-                        }
-                    }
+    printf("Important cases:\n\n");
+    for (int i = 0; i < AccNum; i++) {
+        if (accounts[i].NumOfCom == 0) continue;
+        for (int j = 0; j < accounts[i].NumOfCom; j++) {
+            int isUrgent = 0;
+            for (int h = 0; h < index; h++) {
+                if (strcmp(accounts[i].complaints[j].ID, Urgent_ID_Cases[h]) == 0) {
+                    isUrgent ++;
                     break;
+                }
+            }
+            if (isUrgent == 0) {
+                for (int k = 0; k < KeyWords_Num; k++) {
+                    if (strstr(accounts[i].complaints[j].description, KeyWords_2nd[k]) != NULL) {
+                        printf("Name : %s\n", accounts[i].FullName);
+                        printf("ID : %s\nComplaint : %s (%s)\n", accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
+                        printf("Category : %s\n", accounts[i].complaints[j].categorie);
+                        printf("Description : %s\n", accounts[i].complaints[j].description);
+                        printf("Note from the agency : %s\n", accounts[i].complaints[j].Note);
+                        printf("Date : %s\n\n", accounts[i].complaints[j].date);
+                        count++;
+                        break;
+                    }
                 }
             }
         }
     }
-    if (count == 0){
+
+    if (count == 0) {
         printf("There's no important cases.\n");
     }
     count = 0;
