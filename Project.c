@@ -840,8 +840,15 @@ void Display_Com(ACC *accounts){
 void Priority_Sort(ACC *accounts){
     char KeyWords_1st[KeyWords_Num][MAX_DESCRIPTION_LENGTH] = {"critical", "down", "loss", "security"};
     char KeyWords_2nd[KeyWords_Num][MAX_DESCRIPTION_LENGTH] = {"issues", "disruption", "errors", "failure"};
-
+    int total_Com = 0;
+    for (int i = 0; i < AccNum; i++)
+    {
+        total_Com += accounts[i].NumOfCom;
+    }
+    char Urgent_ID_Cases[total_Com][MAX_ID_DIGITS];
+    int index = 0;
     int count = 0;
+
     printf("Urgent cases : \n\n");
     for (int i = 0; i < AccNum; i++){
         if (accounts[i].NumOfCom == 0){
@@ -849,7 +856,10 @@ void Priority_Sort(ACC *accounts){
         }
         for (int j = 0; j < accounts[i].NumOfCom; j++){
             for (int k = 0; k < KeyWords_Num; k++){
-                if (strstr(accounts[i].complaints[j].description, KeyWords_1st[k]) != NULL){   
+                if (strstr(accounts[i].complaints[j].description, KeyWords_1st[k]) != NULL){ 
+                    strcpy(Urgent_ID_Cases[index], accounts[i].complaints[j].ID);
+                    Urgent_ID_Cases[index][MAX_ID_DIGITS] = '\0';
+                    index ++;
                     count ++;
                     printf("Name : %s\n",accounts[i].FullName);
                     printf("ID : %s\nComplaint : %s (%s)\n",accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
@@ -875,13 +885,18 @@ void Priority_Sort(ACC *accounts){
         for (int j = 0; j < accounts[i].NumOfCom; j++){
             for (int k = 0; k < KeyWords_Num; k++){
                 if (strstr(accounts[i].complaints[j].description, KeyWords_2nd[k]) != NULL){
-                    count ++;
-                    printf("Name : %s\n",accounts[i].FullName);
-                    printf("ID : %s\nComplaint : %s (%s)\n",accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
-                    printf("Category : %s\n",accounts[i].complaints[j].categorie);
-                    printf("Description : %s\n",accounts[i].complaints[j].description);
-                    printf("Note from the agency : %s\n",accounts[i].complaints[j].Note);
-                    printf("Date : %s\n\n",accounts[i].complaints[j].date);
+                    for (int h = 0; h < index; h++){
+                        if (strstr(accounts[i].complaints[j].ID, Urgent_ID_Cases[h]) == NULL){
+                            count ++;
+                            printf("Name : %s\n",accounts[i].FullName);
+                            printf("ID : %s\nComplaint : %s (%s)\n",accounts[i].complaints[j].ID, accounts[i].complaints[j].motif, accounts[i].complaints[j].status);
+                            printf("Category : %s\n",accounts[i].complaints[j].categorie);
+                            printf("Description : %s\n",accounts[i].complaints[j].description);
+                            printf("Note from the agency : %s\n",accounts[i].complaints[j].Note);
+                            printf("Date : %s\n\n",accounts[i].complaints[j].date);
+                            break;
+                        }
+                    }
                     break;
                 }
             }
@@ -1650,7 +1665,7 @@ void Statistiques(ACC *accounts){
             }
         }
     }
-    printf("Theres %i/%i complaint resolved at the moment.\n\n",Total_Com_Resolved, Total_Com);
+    printf("Theres %i out of %i complaints resolved at the moment.\n\n",Total_Com_Resolved, Total_Com);
     
     float TotalTime = 0;
     for (int i = 0; i < AccNum; i++)
@@ -1667,12 +1682,13 @@ void Statistiques(ACC *accounts){
             }
         }
     }
+    if (Total_Com_Resolved == 0)
+    {
+        printf("There is not enough data to calculate the average time to process complaints.\n");
+        return;
+    }
     float avr = TotalTime / Total_Com_Resolved / 60;
     printf("The average time to process complaints is %.2f min.\n\n", avr);
-
-    int current_time = (int)time(NULL);
-    int count = 0;
-
     printf("---------------------------------------------------------------\n");
 }
 
