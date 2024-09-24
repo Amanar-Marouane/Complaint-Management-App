@@ -25,7 +25,7 @@ typedef struct
     char date[MAX_DATE_LENGTH];
     char Note[MAX_DESCRIPTION_LENGTH];
     time_t TimeToCompare;
-    time_t TimeUntilResolved;
+    time_t TimeUntilTreated;
 
 } complain;
 
@@ -1328,18 +1328,20 @@ void Status_change(ACC *accounts){
 
     switch (choice){
     case '1':
-        accounts[Acc_Index].complaints[Com_Index].TimeUntilResolved = current_time;
+        accounts[Acc_Index].complaints[Com_Index].TimeUntilTreated = current_time;
         strcpy(accounts[Acc_Index].complaints[Com_Index].status, "Resolved");
         printf("Done!\n");
         printf("---------------------------------------------------------------------------------\n");
         break;
 
     case '2':
+        accounts[Acc_Index].complaints[Com_Index].TimeUntilTreated = current_time;
         strcpy(accounts[Acc_Index].complaints[Com_Index].status, "Rejected");
         printf("Done!\n");
         printf("---------------------------------------------------------------------------------\n");
         break;
     default:
+        accounts[Acc_Index].complaints[Com_Index].TimeUntilTreated = 0;
         printf("Wrong choice, this complain will stay under the process at the moment.\n");
         printf("---------------------------------------------------------------------------------\n");
         break;
@@ -1676,18 +1678,34 @@ void Statistiques(ACC *accounts){
         }
         for (int j = 0; j < accounts[i].NumOfCom; j++)
         {
-            if (strcmp(accounts[i].complaints[j].status, "Resolved") == 0)
+            if (strcmp(accounts[i].complaints[j].status, "Under process") != 0)
             {
-                TotalTime += difftime(accounts[i].complaints[j].TimeUntilResolved, accounts[i].complaints[j].TimeToCompare);
+                TotalTime += difftime(accounts[i].complaints[j].TimeUntilTreated, accounts[i].complaints[j].TimeToCompare);
             }
         }
     }
-    if (Total_Com_Resolved == 0)
+
+    int Total_Com_Treated = 0;
+    for (int i = 0; i < AccNum; i++)
+    {
+        if (accounts[i].NumOfCom == 0)
+        {
+            continue;
+        }
+        for (int j = 0; j < accounts[i].NumOfCom; j++)
+        {
+            if (strcmp(accounts[i].complaints[j].status, "Under process") != 0)
+            {
+                Total_Com_Treated ++;
+            }
+        }
+    }
+    if (Total_Com_Treated == 0)
     {
         printf("There is not enough data to calculate the average time to process complaints.\n");
         return;
     }
-    float avr = TotalTime / Total_Com_Resolved / 60;
+    float avr = TotalTime / Total_Com_Treated / 60;
     printf("The average time to process complaints is %.2f min.\n\n", avr);
     printf("---------------------------------------------------------------\n");
 }
